@@ -344,5 +344,4 @@ Se não houver erros, retorne: "Nenhum erro identificado".
                         continue
 
                     try:
-                        # CORREÇÃO DA LINHA 348 - Limpar o resultado para garantir JSON válido
                         clean_resultado = resultado.replace("
