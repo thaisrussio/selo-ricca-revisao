@@ -108,6 +108,13 @@ def inject_global_css():
             fill: #FFFFFF !important;
         }}
 
+        /* Reforço: alguns builds colocam o texto em input interno do select */
+div[data-baseweb="select"] input {
+    color: #FFFFFF !important;
+    font-family: 'Aeonik', sans-serif !important;
+    font-weight: 400 !important;
+}
+
         /* Dropdown (lista de opções) */
         ul[role="listbox"] {{
             background-color: #333333 !important;
@@ -127,6 +134,25 @@ def inject_global_css():
         .block-container {{
             padding-top: 1.5rem;
         }}
+
+        /* TextInput */
+div[data-testid="stTextInput"] input {
+    background-color: #FFFFFF !important;
+    color: #000000 !important;
+    font-family: 'Aeonik', sans-serif !important;
+    font-weight: 400 !important;
+    border-radius: 10px !important;
+}
+
+/* TextArea */
+div[data-testid="stTextArea"] textarea {
+    background-color: #FFFFFF !important;
+    color: #000000 !important;
+    font-family: 'Aeonik', sans-serif !important;
+    font-weight: 400 !important;
+    border-radius: 10px !important;
+}
+
         </style>
         """,
         unsafe_allow_html=True,
@@ -148,25 +174,35 @@ def set_background_image(filename: str, opacity: float = 0.18):
     st.markdown(
         f"""
         <style>
-        .ricca-bg {{
+        /* Mantém fundo branco como base */
+        html, body, .stApp {{
+            background: #FFFFFF !important;
+        }}
+
+        /* Background por página: fica atrás do conteúdo, mas dentro do app */
+        .stApp::before {{
+            content: "";
             position: fixed;
             inset: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: -1;
-            pointer-events: none;
-            opacity: 1;
             background-image: url("data:image/png;base64,{encoded}");
             background-repeat: no-repeat;
             background-position: center;
-            background-size: cover; /* página toda */
+            background-size: cover;
+            opacity: {opacity};
+            pointer-events: none;
+            z-index: 0;
+        }}
+
+        /* Garante que o conteúdo fique acima do background */
+        .stApp > .main {{
+            position: relative;
+            z-index: 1;
+            background: transparent !important;
         }}
         </style>
-        <div class="ricca-bg"></div>
         """,
         unsafe_allow_html=True,
     )
-
 
 # ============================================================
 # 5) PROMPT (corretamente incorporado, com glossário preenchido pelo usuário)
@@ -296,7 +332,9 @@ def pagina_login():
 def pagina_info():
     set_background_image(BG_INFO, opacity=1)
 
-    st.image(LOGO_HORIZONTAL, width=220, use_column_width=False)
+    col_logo, col_spacer = st.columns([1, 6])
+with col_logo:
+    st.image(LOGO_HORIZONTAL, width=150, use_column_width=False)
 
     st.markdown("<h2 style='margin-top:8px;'>Informações iniciais</h2>", unsafe_allow_html=True)
 
@@ -319,11 +357,18 @@ def pagina_info():
         height=160,
     )
 
-    # Apenas 1 botão nesta página
+ col_v, col_p = st.columns([1, 1])
+
+with col_v:
+    if st.button("Voltar"):
+        st.session_state.etapa = "login"
+        st.rerun()
+
+with col_p:
     if st.button("Próximo"):
         if not nome.strip() or not projeto.strip():
             st.error("Preencha seu nome e o nome do projeto antes de avançar.")
-            return
+            st.stop()
         st.session_state.etapa = "revisao"
         st.rerun()
 
@@ -331,7 +376,9 @@ def pagina_info():
 def pagina_revisao():
     set_background_image(BG_REVISAO, opacity=1)
 
-    st.image(LOGO_HORIZONTAL, width=220, use_column_width=False)
+    col_logo, col_spacer = st.columns([1, 6])
+with col_logo:
+    st.image(LOGO_HORIZONTAL, width=150, use_column_width=False)
     st.markdown("<h2 style='margin-top:8px;'>Revisão em PDF</h2>", unsafe_allow_html=True)
 
     st.info(
@@ -341,11 +388,20 @@ def pagina_revisao():
 
     uploaded = st.file_uploader("Selecione o arquivo PDF", type=["pdf"])
 
-    # Apenas 1 botão nesta página (além do download, que só aparece após gerar)
-    if st.button("Iniciar Revisão"):
-        if not uploaded:
-            st.error("Faça upload de um PDF para iniciar.")
-            return
+ col_v, col_p = st.columns([1, 1])
+
+with col_v:
+    if st.button("Voltar"):
+        st.session_state.etapa = "login"
+        st.rerun()
+
+with col_p:
+    if st.button("Próximo"):
+        if not nome.strip() or not projeto.strip():
+            st.error("Preencha seu nome e o nome do projeto antes de avançar.")
+            st.stop()
+        st.session_state.etapa = "revisao"
+        st.rerun()
 
         nome = st.session_state.get("nome_usuario", "").strip()
         projeto = st.session_state.get("nome_projeto", "").strip()
