@@ -136,6 +136,7 @@ div[data-baseweb="select"] div {
     font-family: 'Aeonik', sans-serif !important;
     font-weight: 400 !important;
 }
+
         div[data-baseweb="select"] span {{
             color: var(--ricca-branco) !important;
             font-family: 'Aeonik', sans-serif !important;
