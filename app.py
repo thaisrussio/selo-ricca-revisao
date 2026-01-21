@@ -188,36 +188,39 @@ FORMATO DE SAÍDA (OBRIGATÓRIO – JSON):
 
         ocorrencias = []
 
-        with pdfplumber.open(uploaded_file) as pdf:
-            for i, page in enumerate(pdf.pages, start=1):
-                texto = page.extract_text()
-                if not texto:
-                    continue
+        # ===================== SPINNER =====================
+        with st.spinner("Revisão em andamento, por favor aguarde..."):
+            with pdfplumber.open(uploaded_file) as pdf:
+                for i, page in enumerate(pdf.pages, start=1):
+                    texto = page.extract_text()
+                    if not texto:
+                        continue
 
-                resposta = client.chat.completions.create(
-                    model="gpt-4.1-mini",
-                    temperature=0,
-                    messages=[
-                        {"role": "system", "content": prompt_sistema},
-                        {"role": "user", "content": texto}
-                    ]
-                )
+                    resposta = client.chat.completions.create(
+                        model="gpt-4.1-mini",
+                        temperature=0,
+                        messages=[
+                            {"role": "system", "content": prompt_sistema},
+                            {"role": "user", "content": texto}
+                        ]
+                    )
 
-                try:
-                    resultado = resposta.choices[0].message.content
-                    dados = eval(resultado)
-                    for item in dados:
-                        item["pagina"] = i
-                        ocorrencias.append(item)
-                except Exception:
-                    ocorrencias.append({
-                        "pagina": i,
-                        "categoria": "Erro de processamento",
-                        "trecho": "—",
-                        "sugestao": "—",
-                        "justificativa": "Resposta da IA fora do formato esperado"
-                    })
+                    try:
+                        resultado = resposta.choices[0].message.content
+                        dados = eval(resultado)
+                        for item in dados:
+                            item["pagina"] = i
+                            ocorrencias.append(item)
+                    except Exception:
+                        ocorrencias.append({
+                            "pagina": i,
+                            "categoria": "Erro de processamento",
+                            "trecho": "—",
+                            "sugestao": "—",
+                            "justificativa": "Resposta da IA fora do formato esperado"
+                        })
 
+        # ===================== RESULTADO =====================
         if ocorrencias:
             df = pd.DataFrame(ocorrencias)
             st.success("Revisão concluída. Relatório gerado.")
@@ -233,7 +236,7 @@ FORMATO DE SAÍDA (OBRIGATÓRIO – JSON):
         else:
             st.info("Nenhuma ocorrência identificada. Texto em conformidade.")
 
-        # Registro interno
+        # ===================== REGISTRO INTERNO =====================
         log_entry = pd.DataFrame([{
             "usuario": st.session_state.user_name,
             "projeto": st.session_state.project,
@@ -262,5 +265,3 @@ if not st.session_state.authenticated:
     login()
 elif st.session_state.authenticated and not st.session_state.ready_to_review:
     pagina_inicial()
-else:
-    pagina_revisao()
