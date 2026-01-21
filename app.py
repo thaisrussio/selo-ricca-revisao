@@ -348,7 +348,6 @@ with col_logo:
     if st.button("Iniciar Revisão"):
         if not uploaded:
             st.error("Faça upload de um PDF para iniciar.")
-            return
 
         nome = st.session_state.get("nome_usuario", "").strip()
         projeto = st.session_state.get("nome_projeto", "").strip()
