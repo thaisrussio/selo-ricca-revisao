@@ -1,284 +1,204 @@
 import streamlit as st
+from PIL import Image
 import pdfplumber
 import pandas as pd
-import time
 from openai import OpenAI
-import base64
+import os
+import time
 
-# ============================================================
-# FUNÇÃO PARA CARREGAR FONTE AEONIK
-# ============================================================
-def carregar_aeonik():
-    st.markdown(
-        """
-        <style>
-        @font-face {
-            font-family: 'Aeonik-Bold';
-            src: url('assets/fonts/Aeonik-Bold.otf') format('opentype');
-            font-weight: 700;
-        }
-        @font-face {
-            font-family: 'Aeonik-Medium';
-            src: url('assets/fonts/Aeonik-Medium.otf') format('opentype');
-            font-weight: 500;
-        }
-        @font-face {
-            font-family: 'Aeonik-Regular';
-            src: url('assets/fonts/Aeonik-Regular.otf') format('opentype');
-            font-weight: 400;
-        }
-        html, body, [class*="css"]  {
-            font-family: 'Aeonik-Regular', sans-serif;
-        }
-        .bold { font-family: 'Aeonik-Bold'; }
-        .medium { font-family: 'Aeonik-Medium'; }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-
-carregar_aeonik()
-
-# ============================================================
-# CONFIGURAÇÃO DE PÁGINA
-# ============================================================
+# ======================
+# CONFIGURAÇÃO DO STREAMLIT
+# ======================
 st.set_page_config(page_title="Selo Ricca de Revisão", layout="wide")
 
-# ============================================================
+# Caminhos de assets
+assets_path = os.path.join(os.getcwd(), "assets")
+logo_path = os.path.join(assets_path, "logo.png")
+fonts_path = os.path.join(assets_path, "fonts")
+elementos_path = os.path.join(assets_path, "Elementos")
+
+# Função para carregar imagens
+def load_image(subfolder, filename):
+    return Image.open(os.path.join(elementos_path if subfolder=="Elementos" else logo_path, filename))
+
+# ======================
+# FONTE AEONIK
+# ======================
+st.markdown(
+    f"""
+    <style>
+    @font-face {{
+        font-family: 'Aeonik';
+        src: url('{os.path.join(fonts_path,'Aeonik-Regular.otf')}') format('opentype');
+        font-weight: normal;
+    }}
+    @font-face {{
+        font-family: 'Aeonik';
+        src: url('{os.path.join(fonts_path,'Aeonik-Bold.otf')}') format('opentype');
+        font-weight: bold;
+    }}
+    @font-face {{
+        font-family: 'Aeonik';
+        src: url('{os.path.join(fonts_path,'Aeonik-Medium.otf')}') format('opentype');
+        font-weight: 500;
+    }}
+    html, body, [class*="css"] {{
+        font-family: 'Aeonik', sans-serif;
+    }}
+    .stApp {{
+        background-color: #ffffff;
+    }}
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# ======================
 # LOGIN
-# ============================================================
-def pagina_login():
+# ======================
+def login_page():
+    pattern_bg = load_image("Elementos", "Patterns_Escuras-03.png")
+    logo = load_image("", "Vertical_Cor.png")
+    st.image(logo, width=300)
     st.markdown(
         f"""
         <style>
-        .login-background {{
-            background-image: url("assets/Elementos/Patterns Escuras-03.png");
+        .stApp {{
+            background-image: url("file://{os.path.join(elementos_path,'Patterns_Escuras-03.png')}");
             background-size: cover;
             background-repeat: no-repeat;
             background-position: center;
-            height: 100vh;
-        }}
-        .logo {{
-            display: flex;
-            justify-content: center;
-            margin-top: 80px;
         }}
         </style>
-        <div class="login-background">
-            <div class="logo">
-                <img src="assets/logo.png/Vertical_Cor.png" width="300">
-            </div>
-        </div>
         """,
         unsafe_allow_html=True
     )
-    st.session_state['usuario'] = st.text_input("Usuário")
-    st.session_state['senha'] = st.text_input("Senha", type="password")
+
+    st.subheader("Login Selo Ricca de Revisão")
+    username = st.text_input("Usuário")
+    password = st.text_input("Senha", type="password")
+
     if st.button("Entrar"):
-        if st.session_state['usuario'] == "riccarevisao" and st.session_state['senha'] == "Ricc@2026!":
-            st.session_state['autenticado'] = True
-            st.success("Login realizado com sucesso!")
+        if username == "riccarevisao" and password == "Ricc@2026!":
+            st.session_state["authenticated"] = True
+            st.session_state["user"] = username
+            st.experimental_rerun()
         else:
             st.error("Usuário ou senha incorretos.")
 
-# ============================================================
-# PÁGINA DE INFORMAÇÕES DO PROJETO
-# ============================================================
-def pagina_informacoes():
-    st.markdown(
-        f"""
-        <style>
-        .info-background {{
-            background-image: url("assets/Elementos/Patterns-06.png");
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: center;
-        }}
-        .logo-horizontal {{
-            display: flex;
-            justify-content: left;
-            margin-top: 10px;
-        }}
-        </style>
-        <div class="info-background">
-            <div class="logo-horizontal">
-                <img src="assets/logo.png/Horizontal_Cor.png" width="200">
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+# ======================
+# PREENCHIMENTO DE INFORMAÇÕES
+# ======================
+def info_page():
+    pattern_bg = load_image("Elementos", "Patterns-06.png")
+    st.image(pattern_bg, use_column_width=True)
+
     st.header("Informações do Projeto")
-    nome_usuario = st.text_input("Seu nome")
-    nome_projeto = st.text_input("Nome do projeto")
-    time = st.selectbox(
-        "Time",
-        ["Magenta", "Lilás", "Ouro", "Menta", "Patrulha", "Outro"]
-    )
+    st.text_input("Seu nome", key="nome_usuario")
+    st.text_input("Projeto", key="nome_projeto")
+    st.selectbox("Time", ["Magenta", "Lilás", "Ouro", "Menta", "Patrulha", "Outro"], key="time_projeto")
 
-    st.divider()
-    
-    st.header("Glossário e diretrizes do cliente")
-    glossario = st.text_area(
-        "Glossário do cliente (uma regra por linha: termo incorreto = termo correto)",
-        placeholder="Ex.: diretor = Diretor-Presidente"
-    )
-    diretrizes = st.text_area(
-        "Diretrizes adicionais",
-        placeholder="Ex.: evitar voz passiva, priorizar linguagem impessoal"
-    )
-    
-    return nome_usuario, nome_projeto, time, glossario, diretrizes
+    st.header("Glossário do Cliente (exemplo)")
+    st.text_area("Preencha o glossário", value="diretor = Diretor-Presidente\nempresa = Companhia", key="glossario")
 
-# ============================================================
-# FUNÇÃO DE PROMPT
-# ============================================================
-def montar_prompt(glossario, diretrizes):
-    return f"""
-Você atuará como revisor(a) e analista de consistência editorial. Seu papel é revisar de forma minuciosa os arquivos PDF.
+    if st.button("Próximo"):
+        st.session_state["info_filled"] = True
+        st.experimental_rerun()
 
-REGRAS:
-1. Use somente o glossário fornecido pelo usuário.
-2. Não altere conteúdo, tom ou números.
-3. Números de 0 a 10 por extenso, exceto em tabelas.
-4. Conferir elementos visuais, ODS, tipografia, legendas e layout.
-
-GLOSSÁRIO:
-{glossario or "Nenhum glossário fornecido"}
-
-DIRETRIZES:
-{diretrizes or "Nenhuma"}
-
-FORMATO DE SAÍDA:
-[
-  {{
-    "pagina": "número da página",
-    "paragrafo": "número do parágrafo",
-    "elemento": "parágrafo | título | tabela | gráfico | infográfico | box | legenda | rodapé | ODS",
-    "trecho": "trecho original",
-    "sugestao": "correção sugerida (somente se houver erro)",
-    "tipo_erro": "Ortografia | Gramática | Concordância | Estilo | Numérico | Terminologia | Formatação | Visual | Legenda | ODS",
-    "observacao": "comentário opcional"
-  }}
-]
-"""
-
-# ============================================================
+# ======================
 # PÁGINA DE REVISÃO
-# ============================================================
-def pagina_revisao(nome_usuario, nome_projeto, time, glossario, diretrizes):
-    st.markdown(
-        f"""
-        <style>
-        .revisao-background {{
-            background-image: url("assets/Elementos/Patterns Escuras_Prancheta 1.png");
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: center;
-        }}
-        .logo-horizontal {{
-            display: flex;
-            justify-content: left;
-            margin-top: 10px;
-        }}
-        </style>
-        <div class="revisao-background">
-            <div class="logo-horizontal">
-                <img src="assets/logo.png/Horizontal_Cor.png" width="200">
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+# ======================
+def review_page():
+    pattern_bg = load_image("Elementos", "Patterns_Escuras_Prancheta 1.png")
+    logo = load_image("", "Horizontal_Cor.png")
+    st.image(logo, width=200)
+
+    st.header("Selo Ricca de Revisão - Revisão de PDF")
     uploaded_file = st.file_uploader("Selecione o arquivo PDF", type=["pdf"])
-    
-    if uploaded_file and st.button("Iniciar revisão"):
-        if not nome_usuario or not nome_projeto:
-            st.error("Preencha seu nome e o nome do projeto antes de iniciar.")
-        else:
-            client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-            prompt_sistema = montar_prompt(glossario, diretrizes)
-            ocorrencias = []
-            custo_estimado = 0.0
-            tempo_inicio = time.time()
-            
-            with pdfplumber.open(uploaded_file) as pdf:
-                paginas = pdf.pages
-                st.success(f"Texto extraído de {len(paginas)} página(s).")
-                
-                for i, page in enumerate(paginas, start=1):
-                    texto = page.extract_text()
-                    if not texto:
-                        continue
-                    with st.spinner(f"Revisão em andamento (página {i}/{len(paginas)})..."):
-                        try:
-                            resposta = client.chat.completions.create(
-                                model="gpt-4.1-mini",
-                                temperature=0,
-                                messages=[
-                                    {"role": "system", "content": prompt_sistema},
-                                    {"role": "user", "content": texto}
-                                ]
-                            )
-                            resultado = eval(resposta.choices[0].message.content)
-                            for item in resultado:
-                                item["pagina"] = i
-                                ocorrencias.append(item)
-                            # Estimativa simples: $0.0004 por palavra
-                            custo_estimado += 0.0004 * len(texto.split())
-                        except Exception as e:
-                            ocorrencias.append({
-                                "pagina": i,
-                                "paragrafo": "-",
-                                "elemento": "parágrafo",
-                                "trecho": "—",
-                                "sugestao": "—",
-                                "tipo_erro": "Erro de processamento",
-                                "observacao": str(e)
-                            })
-            
-            with st.spinner("Gerando relatório de erros e estimativa de custo..."):
-                df = pd.DataFrame(ocorrencias)
-                tempo_total = time.time() - tempo_inicio
-                
-                # Adiciona coluna de custo estimado
-                df["custo_estimado_usd"] = round(custo_estimado, 4)
-                
-                st.success(f"Revisão concluída em {round(tempo_total, 2)} segundos. Custo estimado: ${round(custo_estimado, 4)}")
-                st.dataframe(df, use_container_width=True)
-                
-                # Botão para download Excel
-                output = pd.ExcelWriter("relatorio_revisao.xlsx", engine='openpyxl')
-                df.to_excel(output, index=False)
-                output.save()
-                
-                st.download_button(
-                    "Baixar relatório em Excel",
-                    data=open("relatorio_revisao.xlsx", "rb").read(),
-                    file_name="selo_ricca_relatorio_revisao.xlsx"
+
+    if uploaded_file:
+        start_time = time.time()
+        with st.spinner("Extraindo texto do PDF..."):
+            time.sleep(1)
+
+        # =====================================
+        # Inicializar cliente OpenAI
+        # =====================================
+        client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+
+        padroes = {
+            "glossario": st.session_state.get("glossario", "")
+        }
+
+        ocorrencias = []
+
+        with pdfplumber.open(uploaded_file) as pdf:
+            for i, page in enumerate(pdf.pages, start=1):
+                texto = page.extract_text() or ""
+                with st.spinner(f"Revisão em andamento (Página {i}/{len(pdf.pages)})..."):
+                    time.sleep(1)
+
+                prompt = f"""
+                Você é um revisor editorial. NÃO REESCREVA o texto.
+                Analise e liste apenas erros seguindo o glossário do cliente:
+                {padroes['glossario']}
+                Forneça saída em JSON com: pagina, trecho, sugestao, tipo de erro, observacao
+                Texto: {texto}
+                """
+
+                resposta = client.chat.completions.create(
+                    model="gpt-4.1-mini",
+                    temperature=0,
+                    messages=[{"role":"system","content":prompt}]
                 )
-                
-                # Histórico interno
-                registro_uso = {
-                    "Usuario": nome_usuario,
-                    "Projeto": nome_projeto,
-                    "Time": time,
-                    "PDFs_Revisados": len(paginas),
-                    "Tempo_Segundos": round(tempo_total,2),
-                    "Custo_Estimado_USD": round(custo_estimado, 4)
-                }
-                st.session_state.setdefault("historico_uso", []).append(registro_uso)
-                st.header("Relatório interno de uso")
-                st.dataframe(pd.DataFrame(st.session_state["historico_uso"]))
 
-# ============================================================
-# MAIN
-# ============================================================
-if 'autenticado' not in st.session_state:
-    st.session_state['autenticado'] = False
+                try:
+                    dados = eval(resposta.choices[0].message.content)
+                    for item in dados:
+                        item["pagina"] = i
+                        ocorrencias.append(item)
+                except:
+                    ocorrencias.append({
+                        "pagina": i,
+                        "tipo de erro": "Erro de processamento",
+                        "trecho": "—",
+                        "sugestao": "—",
+                        "observacao": "Resposta da IA fora do formato esperado"
+                    })
 
-if not st.session_state['autenticado']:
-    pagina_login()
+        duration = round(time.time() - start_time, 2)
+
+        if ocorrencias:
+            df = pd.DataFrame(ocorrencias)
+            df["Usuário"] = st.session_state.get("user", "")
+            df["Projeto"] = st.session_state.get("nome_projeto", "")
+            df["Time"] = st.session_state.get("time_projeto", "")
+            df["Tempo (s)"] = duration
+            df["Custo Estimado (USD)"] = round(duration * 0.0005, 4)  # exemplo custo
+
+            st.success(f"Revisão concluída em {duration}s. Relatório gerado.")
+            st.dataframe(df, use_container_width=True)
+
+            output_path = "selo_ricca_relatorio.xlsx"
+            df.to_excel(output_path, index=False, engine='openpyxl')
+
+            st.download_button(
+                "Baixar relatório em Excel",
+                data=open(output_path, "rb").read(),
+                file_name="selo_ricca_relatorio.xlsx"
+            )
+        else:
+            st.info("Nenhuma ocorrência identificada. Texto em conformidade.")
+
+# ======================
+# CONTROLE DE PÁGINAS
+# ======================
+if "authenticated" not in st.session_state:
+    st.session_state["authenticated"] = False
+
+if not st.session_state["authenticated"]:
+    login_page()
+elif not st.session_state.get("info_filled", False):
+    info_page()
 else:
-    nome_usuario, nome_projeto, time, glossario, diretrizes = pagina_informacoes()
-    pagina_revisao(nome_usuario, nome_projeto, time, glossario, diretrizes)
+    review_page()
