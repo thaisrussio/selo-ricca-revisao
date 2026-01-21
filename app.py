@@ -61,7 +61,7 @@ def set_background(image_filename, opacity=1.0):
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
-            opacity: {opacity};
+            opacity: 1;
             z-index: -1;
         }}
         </style>
@@ -73,7 +73,7 @@ def set_background(image_filename, opacity=1.0):
 # LOGIN
 # ============================================================
 def login_page():
-    set_background("Patterns Escuras-03.png", opacity=0.3)
+    set_background("Patterns Escuras-03.png", opacity=1)
     st.image(os.path.join(logo_path, "Vertical_Cor.png"), width=300)
     st.title("Selo Ricca de Revisão")
     st.subheader("Login de acesso interno")
@@ -98,7 +98,7 @@ if not st.session_state["autenticado"]:
 # PÁGINA DE INFORMAÇÕES INICIAIS
 # ============================================================
 def info_page():
-    set_background("Patterns-06.png", opacity=0.2)
+    set_background("Patterns-06.png", opacity=1)
     st.image(os.path.join(logo_path, "Horizontal_Cor.png"), width=200)
     st.header("Informações do Projeto")
     nome_usuario = st.text_input("Seu nome")
@@ -124,7 +124,7 @@ if "pagina" not in st.session_state or st.session_state.get("pagina") != "revisa
 # PÁGINA DE REVISÃO
 # ============================================================
 def pagina_revisao():
-    set_background("Patterns Escuras_Prancheta 1.png", opacity=0.15)
+    set_background("Patterns Escuras_Prancheta 1.png", opacity=1)
     st.image(os.path.join(logo_path, "Horizontal_Cor.png"), width=150)
     st.header("Revisão Ortográfica e Editorial")
     
