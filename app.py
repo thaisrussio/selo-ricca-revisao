@@ -34,10 +34,16 @@ BG_INFO = "Patterns-06.png"
 BG_REVISAO = "Patterns Escuras_Prancheta 1.png"
 
 # Tamanho do logo horizontal nas páginas 2 e 3 (ajuste aqui se quiser)
-LOGO_HORIZONTAL_WIDTH = 250
+LOGO_HORIZONTAL_WIDTH = 150
+# Tamanho do logo vertical da página inicial (login)
+LOGO_VERTICAL_WIDTH = 280
+
 
 # ============================================================
-# 3) CSS GLOBAL
+# 3) CSS GLOBAL (ajustes solicitados)
+# - Textboxes e selectboxes: fundo grafite + letra branca
+# - Botões: texto branco
+# - File uploader (box PDF): texto branco e fundo grafite
 # ============================================================
 def inject_global_css():
     st.markdown(
@@ -65,8 +71,8 @@ def inject_global_css():
             background: #FFFFFF !important;
         }}
 
-        /* ---- Texto padrão preto em todo o app ---- */
-        html, body, .stApp, p, span, div, label, input, textarea {{
+        /* ---- Texto padrão preto em todo o app (exceto inputs/select/uploader) ---- */
+        html, body, .stApp, p, div, label {{
             font-family: 'Aeonik', sans-serif !important;
             color: #000000 !important;
         }}
@@ -74,7 +80,7 @@ def inject_global_css():
         /* ---- Botões: magenta + texto branco + Aeonik Bold ---- */
         div.stButton > button {{
             background-color: #FF00FF !important;
-            color: #FFFFFF !important;
+            color: #FFFFFF !important; /* branco */
             font-family: 'Aeonik', sans-serif !important;
             font-weight: 700 !important;
             border: none !important;
@@ -90,7 +96,9 @@ def inject_global_css():
             transform: scale(0.99);
         }}
 
-        /* ---- Selectbox: fundo grafite + texto branco + Aeonik Regular ---- */
+        /* =========================
+           Selectbox: grafite + branco
+           ========================= */
         div[data-baseweb="select"] > div {{
             background-color: #333333 !important;
             border-radius: 10px !important;
@@ -112,28 +120,44 @@ def inject_global_css():
             font-family: 'Aeonik', sans-serif !important;
             font-weight: 400 !important;
         }}
-
-        /* Reforço: alguns builds colocam o texto em input interno do select */
         div[data-baseweb="select"] input {{
             color: #FFFFFF !important;
             font-family: 'Aeonik', sans-serif !important;
             font-weight: 400 !important;
         }}
 
-        /* ---- TextInput / TextArea: cor e fonte forçadas ---- */
+        /* =========================
+           TextInput / TextArea: grafite + branco
+           ========================= */
         div[data-testid="stTextInput"] input {{
-            background-color: #FFFFFF !important;
-            color: #000000 !important;
+            background-color: #333333 !important;
+            color: #FFFFFF !important;
             font-family: 'Aeonik', sans-serif !important;
             font-weight: 400 !important;
             border-radius: 10px !important;
+            border: 1px solid #333333 !important;
         }}
         div[data-testid="stTextArea"] textarea {{
-            background-color: #FFFFFF !important;
-            color: #000000 !important;
+            background-color: #333333 !important;
+            color: #FFFFFF !important;
             font-family: 'Aeonik', sans-serif !important;
             font-weight: 400 !important;
             border-radius: 10px !important;
+            border: 1px solid #333333 !important;
+        }}
+
+        /* =========================
+           File uploader (PDF): grafite + branco
+           ========================= */
+        div[data-testid="stFileUploader"] section {{
+            background-color: #333333 !important;
+            border: 1px solid #333333 !important;
+            border-radius: 10px !important;
+        }}
+        div[data-testid="stFileUploader"] * {{
+            color: #FFFFFF !important;
+            font-family: 'Aeonik', sans-serif !important;
+            font-weight: 400 !important;
         }}
 
         /* Remove padding extra do topo */
@@ -161,12 +185,9 @@ def set_background_image(filename: str, opacity: float = 0.18):
     st.markdown(
         f"""
         <style>
-        /* Mantém fundo branco como base */
         html, body, .stApp {{
             background: #FFFFFF !important;
         }}
-
-        /* Background por página: fica atrás do conteúdo, mas dentro do app */
         .stApp::before {{
             content: "";
             position: fixed;
@@ -179,8 +200,6 @@ def set_background_image(filename: str, opacity: float = 0.18):
             pointer-events: none;
             z-index: 0;
         }}
-
-        /* Conteúdo acima do background */
         .stApp > .main {{
             position: relative;
             z-index: 1;
@@ -290,7 +309,7 @@ def pagina_login():
 
     left, center, right = st.columns([1, 2, 1])
     with center:
-        st.image(LOGO_VERTICAL, width=340, use_column_width=False)
+        st.image(LOGO_VERTICAL, width=LOGO_VERTICAL_WIDTH, use_column_width=False)
         st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
 
         st.markdown("<h2 style='margin:0;'>Login</h2>", unsafe_allow_html=True)
@@ -321,33 +340,26 @@ def pagina_info():
         nome = st.text_input("Seu nome", key="nome_usuario")
         projeto = st.text_input("Projeto", key="nome_projeto")
     with col2:
-        time_sel = st.selectbox(
+        st.selectbox(
             "Time",
             ["Magenta", "Lilás", "Ouro", "Menta", "Patrulha", "Outro"],
             key="time_sel",
         )
 
     st.markdown("<h3 style='margin-top:18px;'>Glossário do cliente</h3>", unsafe_allow_html=True)
-    gloss = st.text_area(
+    st.text_area(
         "Uma regra por linha (termo incorreto = termo correto)",
         placeholder="Ex.: diretor = Diretor-Presidente\nempresa = Companhia\ncolaborador(a) = funcionário(a)\nEstado - ES = Estado (ES)",
         key="glossario_cliente",
         height=160,
     )
 
-    col_v, col_p = st.columns([1, 1])
-    with col_v:
-        if st.button("Voltar"):
-            st.session_state.etapa = "login"
-            st.rerun()
-
-    with col_p:
-        if st.button("Próximo"):
-            if not nome.strip() or not projeto.strip():
-                st.error("Preencha seu nome e o nome do projeto antes de avançar.")
-                st.stop()
-            st.session_state.etapa = "revisao"
-            st.rerun()
+    if st.button("Próximo"):
+        if not nome.strip() or not projeto.strip():
+            st.error("Preencha seu nome e o nome do projeto antes de avançar.")
+            st.stop()
+        st.session_state.etapa = "revisao"
+        st.rerun()
 
 
 def pagina_revisao():
@@ -364,16 +376,21 @@ def pagina_revisao():
         "Para controlar custos, comece com PDFs curtos."
     )
 
-    col_v, col_upload = st.columns([1, 3])
-    with col_v:
+    # Botões: voltar à esquerda e iniciar revisão à direita (mesma linha)
+    col_left, col_mid, col_right = st.columns([1, 6, 1])
+
+    with col_left:
         if st.button("Voltar"):
             st.session_state.etapa = "info"
             st.rerun()
 
-    with col_upload:
+    with col_mid:
         uploaded = st.file_uploader("Selecione o arquivo PDF", type=["pdf"])
 
-    if st.button("Iniciar Revisão"):
+    with col_right:
+        iniciar = st.button("Iniciar Revisão")
+
+    if iniciar:
         if not uploaded:
             st.error("Faça upload de um PDF para iniciar.")
             st.stop()
