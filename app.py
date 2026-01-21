@@ -73,7 +73,7 @@ def inject_global_css():
         /* ---- Botões: magenta + texto branco + Aeonik Bold ---- */
         div.stButton > button {{
             background-color: #FF00FF !important;
-            color: #FFFFFF !important;
+            color: #FFF !important;
             font-family: 'Aeonik', sans-serif !important;
             font-weight: 700 !important;
             border: none !important;
@@ -95,6 +95,7 @@ def inject_global_css():
             background-color: #333333 !important;
             border-radius: 10px !important;
             border: 1px solid #333333 !important;
+            color: #FFFFFF !important;
         }}
         /* Texto selecionado */
         div[data-baseweb="select"] span {{
@@ -154,7 +155,7 @@ def set_background_image(filename: str, opacity: float = 0.18):
             height: 100vh;
             z-index: -1;
             pointer-events: none;
-            opacity: {opacity};
+            opacity: 1;
             background-image: url("data:image/png;base64,{encoded}");
             background-repeat: no-repeat;
             background-position: center;
@@ -269,12 +270,12 @@ if "historico_uso" not in st.session_state:
 # 9) PÁGINAS
 # ============================================================
 def pagina_login():
-    set_background_image(BG_LOGIN, opacity=0.20)
+    set_background_image(BG_LOGIN, opacity=1)
 
     # Centralizar logo e conteúdo
     left, center, right = st.columns([1, 2, 1])
     with center:
-        st.image(LOGO_VERTICAL, width=340)
+        st.image(LOGO_VERTICAL, width=340, use_column_width=False))
         st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
 
         st.markdown("<h2 style='margin:0;'>Login</h2>", unsafe_allow_html=True)
@@ -293,9 +294,9 @@ def pagina_login():
 
 
 def pagina_info():
-    set_background_image(BG_INFO, opacity=0.14)
+    set_background_image(BG_INFO, opacity=1)
 
-    st.image(LOGO_HORIZONTAL, width=220)
+    st.image(LOGO_HORIZONTAL, width=220, use_column_width=False)
 
     st.markdown("<h2 style='margin-top:8px;'>Informações iniciais</h2>", unsafe_allow_html=True)
 
@@ -328,9 +329,9 @@ def pagina_info():
 
 
 def pagina_revisao():
-    set_background_image(BG_REVISAO, opacity=0.10)
+    set_background_image(BG_REVISAO, opacity=1)
 
-    st.image(LOGO_HORIZONTAL, width=220)
+    st.image(LOGO_HORIZONTAL, width=220, use_column_width=False)
     st.markdown("<h2 style='margin-top:8px;'>Revisão em PDF</h2>", unsafe_allow_html=True)
 
     st.info(
