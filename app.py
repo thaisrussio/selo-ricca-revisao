@@ -325,7 +325,6 @@ with col_logo:
     if st.button("Próximo"):
         if not nome.strip() or not projeto.strip():
             st.error("Preencha seu nome e o nome do projeto antes de avançar.")
-            return
         st.session_state.etapa = "revisao"
         st.rerun()
 
