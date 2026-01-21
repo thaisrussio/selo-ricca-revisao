@@ -7,6 +7,7 @@ from PIL import Image
 from openai import OpenAI
 import base64
 import io
+import json
 
 # ============================================================
 # CONFIGURAÇÕES DE PÁGINA E FONTE
@@ -17,29 +18,18 @@ st.set_page_config(page_title="Selo Ricca de Revisão", layout="wide")
 # CARREGANDO FONTES AEONIK
 # ============================================================
 def load_fonts():
-    # Carrega as fontes Aeonik diretamente via CSS
     st.markdown(
         """
         <style>
-        @font-face {
-            font-family: 'Aeonik';
-            src: url('https://raw.githubusercontent.com/SEU_USUARIO/SEU_REPOSITORIO/main/assets/fonts/Aeonik-Regular.otf') format('opentype');
-            font-weight: 400;
-        }
-        @font-face {
-            font-family: 'Aeonik';
-            src: url('https://raw.githubusercontent.com/SEU_USUARIO/SEU_REPOSITORIO/main/assets/fonts/Aeonik-Medium.otf') format('opentype');
-            font-weight: 500;
-        }
-        @font-face {
-            font-family: 'Aeonik';
-            src: url('https://raw.githubusercontent.com/SEU_USUARIO/SEU_REPOSITORIO/main/assets/fonts/Aeonik-Bold.otf') format('opentype');
-            font-weight: 700;
-        }
+        @import url('https://fonts.cdnfonts.com/css/aeonik');
 
         /* Aplicação global da fonte */
-        html, body, [class*="css"], [class*="st-"], .stApp, .main, p, div, h1, h2, h3, h4, h5, h6, span {
+        html, body, [class*="css"], [class*="st-"], .stApp, .main, p, div, h1, h2, h3, h4, h5, h6, span, label, button, input, textarea, .stSelectbox, .stDataFrame {
             font-family: 'Aeonik', sans-serif !important;
+        }
+
+        /* Cor do texto padrão: preto */
+        body, p, div, h1, h2, h3, h4, h5, h6, span, label, .stTextInput input, .stTextArea textarea, .stMarkdown {
             color: #000000 !important;
         }
 
@@ -48,7 +38,7 @@ def load_fonts():
             background-color: #FFFFFF !important;
         }
 
-        /* Botões magenta */
+        /* Botões magenta com texto branco */
         div.stButton > button {
             background-color: #FF00FF !important;
             color: white !important;
@@ -64,7 +54,7 @@ def load_fonts():
             color: white !important;
         }
 
-        /* Selectboxes */
+        /* Selectboxes grafite com texto branco */
         div[data-baseweb="select"] > div {
             background-color: #333333 !important;
             border-radius: 6px !important;
@@ -79,26 +69,45 @@ def load_fonts():
         }
 
         /* Dropdown menu items */
-        ul[role="listbox"] li {
+        ul[role="listbox"] li, div[role="listbox"] div {
             background-color: #333333 !important;
             color: white !important;
             font-family: 'Aeonik', sans-serif !important;
         }
 
-        /* Inputs de texto */
-        .stTextInput input, .stTextArea textarea {
-            color: #000000 !important;
-            font-family: 'Aeonik', sans-serif !important;
+        /* Dropdown menu hover */
+        ul[role="listbox"] li:hover, div[role="listbox"] div:hover {
+            background-color: #444444 !important;
         }
 
         /* Ajuste para dataframes */
-        .stDataFrame {
+        .stDataFrame table {
             font-family: 'Aeonik', sans-serif !important;
         }
 
         /* Ajuste para textos de spinner e mensagens */
-        .stSpinner, .stAlert, .stInfo {
+        .stSpinner, .stAlert, .stInfo, .stSuccess, .stWarning, .stError {
             font-family: 'Aeonik', sans-serif !important;
+        }
+
+        /* Ajuste para file uploader */
+        .stFileUploader div {
+            font-family: 'Aeonik', sans-serif !important;
+        }
+
+        /* Remover borda do selectbox */
+        div[data-baseweb="select"] > div {
+            border: none !important;
+        }
+
+        /* Ajustar cor do texto no selectbox */
+        div[data-baseweb="select"] {
+            color: white !important;
+        }
+
+        /* Garantir que o texto dentro do selectbox seja branco */
+        [data-baseweb="select"] [data-testid="stMarkdown"] p {
+            color: white !important;
         }
         </style>
         """,
@@ -215,12 +224,15 @@ def info_page():
     glossario = st.text_area("Glossário", placeholder="empresa = Companhia\ncolaborador(a) = funcionário(a)\nEstado - ES = Estado (ES)")
 
     if st.button("Próximo"):
-        st.session_state["nome_usuario"] = nome_usuario
-        st.session_state["projeto"] = projeto
-        st.session_state["time"] = time_selecionado
-        st.session_state["glossario"] = glossario
-        st.session_state["pagina"] = "revisao"
-        st.experimental_rerun()
+        if not nome_usuario or not projeto:
+            st.warning("Por favor, preencha seu nome e o nome do projeto.")
+        else:
+            st.session_state["nome_usuario"] = nome_usuario
+            st.session_state["projeto"] = projeto
+            st.session_state["time"] = time_selecionado
+            st.session_state["glossario"] = glossario
+            st.session_state["pagina"] = "revisao"
+            st.experimental_rerun()
 
 if "pagina" not in st.session_state:
     st.session_state["pagina"] = "info"
@@ -244,6 +256,15 @@ def pagina_revisao():
         st.error(f"Erro ao carregar logo: {e}")
 
     st.header("Revisão Ortográfica e Editorial")
+
+    # Mostrar informações do projeto
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.info(f"Usuário: {st.session_state.get('nome_usuario', '')}")
+    with col2:
+        st.info(f"Projeto: {st.session_state.get('projeto', '')}")
+    with col3:
+        st.info(f"Time: {st.session_state.get('time', '')}")
 
     uploaded_file = st.file_uploader("Selecione o PDF", type=["pdf"])
 
@@ -270,11 +291,15 @@ Se não houver erros, retorne: "Nenhum erro identificado".
 """
 
     if uploaded_file:
-        if st.button("Iniciar Revisão"):
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            start_button = st.button("Iniciar Revisão", use_container_width=True)
+
+        if start_button:
             start_time = time.time()
             texto_paginas = []
 
-            with st.spinner("Extraindo texto..."):
+            with st.spinner("Extraindo texto do PDF..."):
                 try:
                     with pdfplumber.open(uploaded_file) as pdf:
                         for i, page in enumerate(pdf.pages, start=1):
