@@ -16,27 +16,33 @@ st.markdown(
     /* Fonte Aeonik em todo o app */
     * {
         font-family: 'Aeonik', sans-serif;
-        color: #000000;  /* Preto */
+        color: #000000;  /* Preto para textos gerais */
     }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-st.markdown(
-    """
-    <style>
+
     /* Botões principais */
     div.stButton > button {
         background-color: #FF00FF;  /* Magenta */
-        color: white;
+        color: white;               /* Texto do botão branco */
         font-weight: bold;
         border-radius: 8px;
         padding: 0.5em 1.2em;
-        font-family: 'Aeonik', sans-serif;
         font-size: 16px;
     }
     div.stButton > button:hover {
-        background-color: #E600E6; /* Tom mais escuro ao passar o mouse */
+        background-color: #E600E6; /* Magenta mais escuro ao passar o mouse */
+    }
+
+    /* Fundo branco para todo o app */
+    .stApp {
+        background-color: #FFFFFF;
+    }
+
+    /* Texto do selectbox do "Time" em branco */
+    div[data-baseweb="select"] > div > div > div > div {
+        color: white !important;
+    }
+    div[data-baseweb="select"] span {
+        color: white !important;
     }
     </style>
     """,
