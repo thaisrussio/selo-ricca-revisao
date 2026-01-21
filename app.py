@@ -33,10 +33,12 @@ BG_LOGIN = "Patterns Escuras-03.png"
 BG_INFO = "Patterns-06.png"
 BG_REVISAO = "Patterns Escuras_Prancheta 1.png"
 
+# Tamanho do logo horizontal nas páginas 2 e 3 (ajuste aqui se quiser)
+LOGO_HORIZONTAL_WIDTH = 150
+
 
 # ============================================================
-# 3) CSS GLOBAL (atende: fundo branco, texto preto, selectbox grafite+texto branco,
-#    botões magenta com texto branco e Aeonik Bold)
+# 3) CSS GLOBAL
 # ============================================================
 def inject_global_css():
     st.markdown(
@@ -73,7 +75,7 @@ def inject_global_css():
         /* ---- Botões: magenta + texto branco + Aeonik Bold ---- */
         div.stButton > button {{
             background-color: #FF00FF !important;
-            color: #FFF !important;
+            color: #FFFFFF !important;
             font-family: 'Aeonik', sans-serif !important;
             font-weight: 700 !important;
             border: none !important;
@@ -90,32 +92,19 @@ def inject_global_css():
         }}
 
         /* ---- Selectbox: fundo grafite + texto branco + Aeonik Regular ---- */
-        /* Caixa do select */
         div[data-baseweb="select"] > div {{
             background-color: #333333 !important;
             border-radius: 10px !important;
             border: 1px solid #333333 !important;
-            color: #FFFFFF !important;
         }}
-        /* Texto selecionado */
         div[data-baseweb="select"] span {{
             color: #FFFFFF !important;
             font-family: 'Aeonik', sans-serif !important;
             font-weight: 400 !important;
         }}
-        /* Ícone/seta */
         div[data-baseweb="select"] svg {{
             fill: #FFFFFF !important;
         }}
-
-        /* Reforço: alguns builds colocam o texto em input interno do select */
-div[data-baseweb="select"] input {
-    color: #FFFFFF !important;
-    font-family: 'Aeonik', sans-serif !important;
-    font-weight: 400 !important;
-}
-
-        /* Dropdown (lista de opções) */
         ul[role="listbox"] {{
             background-color: #333333 !important;
         }}
@@ -125,34 +114,33 @@ div[data-baseweb="select"] input {
             font-weight: 400 !important;
         }}
 
-        /* Inputs e textareas com fundo branco (para bater com a identidade) */
-        input, textarea {{
+        /* Reforço: alguns builds colocam o texto em input interno do select */
+        div[data-baseweb="select"] input {{
+            color: #FFFFFF !important;
+            font-family: 'Aeonik', sans-serif !important;
+            font-weight: 400 !important;
+        }}
+
+        /* ---- TextInput / TextArea: cor e fonte forçadas ---- */
+        div[data-testid="stTextInput"] input {{
             background-color: #FFFFFF !important;
+            color: #000000 !important;
+            font-family: 'Aeonik', sans-serif !important;
+            font-weight: 400 !important;
+            border-radius: 10px !important;
+        }}
+        div[data-testid="stTextArea"] textarea {{
+            background-color: #FFFFFF !important;
+            color: #000000 !important;
+            font-family: 'Aeonik', sans-serif !important;
+            font-weight: 400 !important;
+            border-radius: 10px !important;
         }}
 
         /* Remove padding extra do topo */
         .block-container {{
             padding-top: 1.5rem;
         }}
-
-        /* TextInput */
-div[data-testid="stTextInput"] input {
-    background-color: #FFFFFF !important;
-    color: #000000 !important;
-    font-family: 'Aeonik', sans-serif !important;
-    font-weight: 400 !important;
-    border-radius: 10px !important;
-}
-
-/* TextArea */
-div[data-testid="stTextArea"] textarea {
-    background-color: #FFFFFF !important;
-    color: #000000 !important;
-    font-family: 'Aeonik', sans-serif !important;
-    font-weight: 400 !important;
-    border-radius: 10px !important;
-}
-
         </style>
         """,
         unsafe_allow_html=True,
@@ -160,7 +148,7 @@ div[data-testid="stTextArea"] textarea {
 
 
 # ============================================================
-# 4) FUNDO EM CAMADA (atrás de tudo) — ocupa a página toda
+# 4) FUNDO EM CAMADA (robusto no Streamlit Cloud)
 # ============================================================
 def set_background_image(filename: str, opacity: float = 0.18):
     path = os.path.join(ELEMENTOS_DIR, filename)
@@ -193,7 +181,7 @@ def set_background_image(filename: str, opacity: float = 0.18):
             z-index: 0;
         }}
 
-        /* Garante que o conteúdo fique acima do background */
+        /* Conteúdo acima do background */
         .stApp > .main {{
             position: relative;
             z-index: 1;
@@ -204,8 +192,9 @@ def set_background_image(filename: str, opacity: float = 0.18):
         unsafe_allow_html=True,
     )
 
+
 # ============================================================
-# 5) PROMPT (corretamente incorporado, com glossário preenchido pelo usuário)
+# 5) PROMPT
 # ============================================================
 def montar_prompt(glossario_cliente: str) -> str:
     gloss = (glossario_cliente or "").strip()
@@ -246,18 +235,16 @@ FORMATO DE SAÍDA (OBRIGATÓRIO — JSON puro, sem comentários, sem markdown):
 
 
 # ============================================================
-# 6) PARSER (sem eval): tenta JSON, depois literal_eval seguro
+# 6) PARSER (sem eval)
 # ============================================================
 def parse_model_output(text: str):
     if not text:
         return []
     t = text.strip()
 
-    # Se o modelo devolveu algo tipo "Nenhum erro identificado", tratamos como lista vazia
     if t.lower().startswith("nenhum erro"):
         return []
 
-    # Tenta JSON
     try:
         data = json.loads(t)
         if isinstance(data, list):
@@ -265,7 +252,6 @@ def parse_model_output(text: str):
     except Exception:
         pass
 
-    # fallback: literal_eval (seguro, não executa código)
     try:
         data = ast.literal_eval(t)
         if isinstance(data, list):
@@ -273,19 +259,14 @@ def parse_model_output(text: str):
     except Exception:
         pass
 
-    # Se falhar, retorna marcador de erro
     return [{"_parse_error": True, "raw": t}]
 
 
 # ============================================================
-# 7) CUSTO ESTIMADO (estimativa simples; opcionalmente melhora com usage se disponível)
+# 7) CUSTO ESTIMADO
 # ============================================================
 def estimar_custo_usd(num_chars: int) -> float:
-    # Heurística conservadora: ~4 chars por token (média).
-    # Sem tabela oficial aqui, então mantemos só estimativa.
     est_tokens = max(1, num_chars // 4)
-    # “intermediário” — você pode ajustar depois quando quiser:
-    # Ex.: US$ 0.000002 por token (valor fictício para estimativa interna)
     return round(est_tokens * 0.000002, 6)
 
 
@@ -306,9 +287,8 @@ if "historico_uso" not in st.session_state:
 # 9) PÁGINAS
 # ============================================================
 def pagina_login():
-    set_background_image(BG_LOGIN, opacity=1)
+    set_background_image(BG_LOGIN, opacity=0.20)
 
-    # Centralizar logo e conteúdo
     left, center, right = st.columns([1, 2, 1])
     with center:
         st.image(LOGO_VERTICAL, width=340, use_column_width=False)
@@ -319,7 +299,6 @@ def pagina_login():
         user = st.text_input("Usuário", key="login_user")
         pwd = st.text_input("Senha", type="password", key="login_pwd")
 
-        # Apenas 1 botão nesta página
         if st.button("Próximo"):
             if user == "riccarevisao" and pwd == "Ricc@2026!":
                 st.session_state.autenticado = True
@@ -330,11 +309,11 @@ def pagina_login():
 
 
 def pagina_info():
-    set_background_image(BG_INFO, opacity=1)
+    set_background_image(BG_INFO, opacity=0.14)
 
     col_logo, col_spacer = st.columns([1, 6])
-with col_logo:
-    st.image(LOGO_HORIZONTAL, width=150, use_column_width=False)
+    with col_logo:
+        st.image(LOGO_HORIZONTAL, width=LOGO_HORIZONTAL_WIDTH, use_column_width=False)
 
     st.markdown("<h2 style='margin-top:8px;'>Informações iniciais</h2>", unsafe_allow_html=True)
 
@@ -357,28 +336,28 @@ with col_logo:
         height=160,
     )
 
- col_v, col_p = st.columns([1, 1])
+    col_v, col_p = st.columns([1, 1])
+    with col_v:
+        if st.button("Voltar"):
+            st.session_state.etapa = "login"
+            st.rerun()
 
-with col_v:
-    if st.button("Voltar"):
-        st.session_state.etapa = "login"
-        st.rerun()
-
-with col_p:
-    if st.button("Próximo"):
-        if not nome.strip() or not projeto.strip():
-            st.error("Preencha seu nome e o nome do projeto antes de avançar.")
-            st.stop()
-        st.session_state.etapa = "revisao"
-        st.rerun()
+    with col_p:
+        if st.button("Próximo"):
+            if not nome.strip() or not projeto.strip():
+                st.error("Preencha seu nome e o nome do projeto antes de avançar.")
+                st.stop()
+            st.session_state.etapa = "revisao"
+            st.rerun()
 
 
 def pagina_revisao():
-    set_background_image(BG_REVISAO, opacity=1)
+    set_background_image(BG_REVISAO, opacity=0.10)
 
     col_logo, col_spacer = st.columns([1, 6])
-with col_logo:
-    st.image(LOGO_HORIZONTAL, width=150, use_column_width=False)
+    with col_logo:
+        st.image(LOGO_HORIZONTAL, width=LOGO_HORIZONTAL_WIDTH, use_column_width=False)
+
     st.markdown("<h2 style='margin-top:8px;'>Revisão em PDF</h2>", unsafe_allow_html=True)
 
     st.info(
@@ -386,29 +365,25 @@ with col_logo:
         "Para controlar custos, comece com PDFs curtos."
     )
 
-    uploaded = st.file_uploader("Selecione o arquivo PDF", type=["pdf"])
+    col_v, col_upload = st.columns([1, 3])
+    with col_v:
+        if st.button("Voltar"):
+            st.session_state.etapa = "info"
+            st.rerun()
 
- col_v, col_p = st.columns([1, 1])
+    with col_upload:
+        uploaded = st.file_uploader("Selecione o arquivo PDF", type=["pdf"])
 
-with col_v:
-    if st.button("Voltar"):
-        st.session_state.etapa = "login"
-        st.rerun()
-
-with col_p:
-    if st.button("Próximo"):
-        if not nome.strip() or not projeto.strip():
-            st.error("Preencha seu nome e o nome do projeto antes de avançar.")
+    if st.button("Iniciar Revisão"):
+        if not uploaded:
+            st.error("Faça upload de um PDF para iniciar.")
             st.stop()
-        st.session_state.etapa = "revisao"
-        st.rerun()
 
         nome = st.session_state.get("nome_usuario", "").strip()
         projeto = st.session_state.get("nome_projeto", "").strip()
         time_sel = st.session_state.get("time_sel", "")
         glossario = st.session_state.get("glossario_cliente", "")
 
-        # Etapa 1: extração
         t0 = time.time()
         status_area = st.empty()
 
@@ -417,13 +392,11 @@ with col_p:
             pages_text = []
             total_chars = 0
             with pdfplumber.open(uploaded) as pdf:
-                total_pages = len(pdf.pages)
                 for i, page in enumerate(pdf.pages, start=1):
                     txt = page.extract_text() or ""
                     total_chars += len(txt)
                     pages_text.append((i, txt))
 
-        # Etapa 2: revisão
         status_area.info("Revisão em andamento, aguarde mais um pouquinho...")
         with st.spinner("Revisão em andamento, aguarde mais um pouquinho..."):
             client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
@@ -432,7 +405,6 @@ with col_p:
             ocorrencias = []
             for (page_num, txt) in pages_text:
                 if not txt.strip():
-                    # página sem texto extraível
                     ocorrencias.append(
                         {
                             "pagina": page_num,
@@ -458,7 +430,6 @@ with col_p:
                 raw = resp.choices[0].message.content
                 data = parse_model_output(raw)
 
-                # Se parse falhou, registra erro
                 if data and isinstance(data, list) and data[0].get("_parse_error"):
                     ocorrencias.append(
                         {
@@ -473,7 +444,6 @@ with col_p:
                     )
                     continue
 
-                # Normaliza e força pagina correta
                 for item in data:
                     if not isinstance(item, dict):
                         continue
@@ -486,12 +456,9 @@ with col_p:
                     item.setdefault("observacao", "")
                     ocorrencias.append(item)
 
-        # Etapa 3: relatório
         status_area.info("Gerando relatório de erros...")
         with st.spinner("Gerando relatório de erros..."):
             dur_s = round(time.time() - t0, 2)
-
-            # custo estimado (heurístico)
             custo_usd = estimar_custo_usd(total_chars)
 
             if not ocorrencias:
@@ -511,7 +478,6 @@ with col_p:
             else:
                 df = pd.DataFrame(ocorrencias)
 
-            # Campos adicionais (uso interno)
             df.insert(0, "usuario", nome)
             df.insert(1, "projeto", projeto)
             df.insert(2, "time", time_sel)
@@ -522,12 +488,10 @@ with col_p:
 
             st.dataframe(df, use_container_width=True)
 
-            # Excel
             output = io.BytesIO()
             with pd.ExcelWriter(output, engine="openpyxl") as writer:
                 df.to_excel(writer, index=False, sheet_name="Relatorio_Erros")
 
-                # Aba de uso interno (log)
                 uso = pd.DataFrame(
                     [
                         {
@@ -545,7 +509,6 @@ with col_p:
 
             output.seek(0)
 
-            # Log em memória (sessão)
             st.session_state.historico_uso.append(
                 {
                     "usuario": nome,
@@ -565,7 +528,6 @@ with col_p:
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             )
 
-            # Visão rápida do uso interno (sessão atual)
             with st.expander("Registro interno de uso (sessão atual)"):
                 st.dataframe(pd.DataFrame(st.session_state.historico_uso), use_container_width=True)
 
