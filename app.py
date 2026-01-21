@@ -124,15 +124,8 @@ def inject_global_css():
         div[data-baseweb="select"] > div {{
             background-color: var(--ricca-grafite) !important;
             border-radius: 10px !important;
+            color: #FFF !important;
             border: 1px solid var(--ricca-grafite) !important;
-            /* === GARANTE TEXTO BRANCO NO SELECTBOX (VALOR SELECIONADO) === */
-div[data-baseweb="select"] *,
-div[data-baseweb="select"] span,
-div[data-baseweb="select"] input,
-div[data-baseweb="select"] div {
-    color: #FFFFFF !important;
-    font-family: 'Aeonik', sans-serif !important;
-    font-weight: 400 !important;
         }}
         div[data-baseweb="select"] span {{
             color: var(--ricca-branco) !important;
