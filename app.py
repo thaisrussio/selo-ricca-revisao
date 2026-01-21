@@ -9,69 +9,66 @@ import io
 import json
 
 # ============================================================
-# CONFIGURAÇÕES INICIAIS
+# CONFIGURAÇÕES DE PÁGINA E FONTE
 # ============================================================
-st.set_page_config(page_title="Selo Ricca de Revisão", layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="Selo Ricca de Revisão", layout="wide")
 
 # ============================================================
-# PATHS DE ASSETS (conforme fornecido)
+# PATHS DE ASSETS (conforme informado)
 # ============================================================
 logo_dir = "assets/logo"
 fonts_dir = "assets/fonts"
 elementos_path = "assets/Elementos"
 
 # ============================================================
-# CSS GLOBAL (fontes Aeonik, botões, selectbox, backgrounds)
+# CSS GLOBAL (Aeonik aplicado amplamente, cores e botões)
 # ============================================================
 def inject_global_css():
-    # paths de fontes (conforme fornecido)
     regular = os.path.join(fonts_dir, "Aeonik-Regular.otf")
     medium = os.path.join(fonts_dir, "Aeonik-Medium.otf")
     bold = os.path.join(fonts_dir, "Aeonik-Bold.otf")
 
     css = f"""
     <style>
-    /* Font-face */
-    @font-face {{ font-family: 'Aeonik'; src: url('{regular}') format('opentype'); font-weight: 400; }}
-    @font-face {{ font-family: 'Aeonik'; src: url('{medium}') format('opentype'); font-weight: 500; }}
-    @font-face {{ font-family: 'Aeonik'; src: url('{bold}') format('opentype'); font-weight: 700; }}
-
-    /* Força família */
-    html, body, .stApp, .main {{
-        font-family: 'Aeonik', sans-serif;
-        background-color: #FFFFFF !important;
-        color: #000000 !important;
+    @font-face {{
+        font-family: 'Aeonik';
+        src: url('{regular}') format('opentype');
+        font-weight: 400;
     }}
-
-    /* Botões - padrão */
-    div.stButton > button {{
-        background-color: #FF00FF;
-        color: #FFFFFF;
-        font-family: 'Aeonik', sans-serif !important;
+    @font-face {{
+        font-family: 'Aeonik';
+        src: url('{medium}') format('opentype');
+        font-weight: 500;
+    }}
+    @font-face {{
+        font-family: 'Aeonik';
+        src: url('{bold}') format('opentype');
         font-weight: 700;
-        border-radius: 8px;
-        padding: 0.5em 1.2em;
-        font-size: 16px;
     }}
-    div.stButton > button:hover {{
-        background-color: #E600E6;
+    /* Aplicar Aeonik globalmente */
+    html, body, .stApp, .main, .block-container, .element-container, .css-1d391kg, .stMarkdown {{
+        font-family: 'Aeonik', sans-serif !important;
+        color: #000000 !important;
+        background-color: #FFFFFF !important;
     }}
 
-    /* Botão cinza (logout / voltar) - classe custom será aplicada via HTML wrapper */
-    .ricca-btn-gray {{
-        background-color: #666666 !important;
+    /* Botões padrão Streamlit (primários) - magenta */
+    div.stButton > button {{
+        background-color: #FF00FF !important;
         color: #FFFFFF !important;
-        font-family: 'Aeonik' !important;
-        font-weight: 400 !important;
+        font-weight: 700 !important;
         border-radius: 8px !important;
-        padding: 0.45em 1.0em !important;
+        padding: 0.5em 1.1em !important;
         font-size: 16px !important;
     }}
+    div.stButton > button:hover {{
+        background-color: #E600E6 !important;
+    }}
 
-    /* Selectbox visual (frágil, depende de estrutura interna do Streamlit) */
+    /* Selectbox styling (pode ser frágil entre versões do Streamlit) */
     div[data-baseweb="select"] > div > div > div > div {{
         background-color: #333333 !important;
-        border-radius: 6px;
+        border-radius: 6px !important;
     }}
     div[data-baseweb="select"] span,
     div[data-baseweb="select"] div[class*="value"] {{
@@ -79,46 +76,37 @@ def inject_global_css():
         font-family: 'Aeonik', sans-serif !important;
     }}
 
-    /* Background layer (aplicada por set_background) */
-    .app-background {{
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: -1;
-        background-size: cover;
-        background-repeat: no-repeat;
-        background-position: center;
+    /* Estilos para os botões cinza "falsos" (links formatados) */
+    .ricca-btn-gray {{
+        display: inline-block;
+        background-color: #666666;
+        color: #FFFFFF !important;
+        padding: 0.45em 1em;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        font-family: 'Aeonik', sans-serif;
+        margin-right: 8px;
+    }}
+    .ricca-btn-gray:hover {{
+        background-color: #555555;
     }}
 
-    /* Labels / helper customizados (podem ser usados com st.markdown) */
-    .ricca-title-bold {{
-        font-family: 'Aeonik', sans-serif;
+    /* Ajuste de header grande para a página 3 */
+    .ricca-h1 {{
+        font-size: 28px;
         font-weight: 700;
-        color: #000000;
+        margin-bottom: 6px;
     }}
-    .ricca-medium-16 {{
-        font-family: 'Aeonik', sans-serif;
-        font-weight: 500;
-        color: #000000;
-        font-size: 16px;
+
+    /* Helper glossário menor e espaçamento */
+    .ricca-glossary-note {{
+        font-size: 13px;
+        color: #333333;
+        margin-top: 6px;
+        margin-bottom: 6px;
     }}
-    .ricca-medium-20 {{
-        font-family: 'Aeonik', sans-serif;
-        font-weight: 500;
-        color: #000000;
-        font-size: 20px;
-    }}
-    .glossario-box {{
-        background-color: #FFE6FF; /* magenta clarinho */
-        border-radius: 6px;
-        padding: 0.6rem;
-        color: #FF00FF; /* magenta vivo */
-        font-family: 'Aeonik', sans-serif;
-        font-weight: 500;
-        font-size: 16px;
-    }}
+
     </style>
     """
     st.markdown(css, unsafe_allow_html=True)
@@ -126,139 +114,137 @@ def inject_global_css():
 inject_global_css()
 
 # ============================================================
-# FUNÇÃO PARA DEFINIR BACKGROUND (usa arquivo em assets/Elementos)
+# FUNÇÃO PARA DEFINIR BACKGROUND (BASE64)
 # ============================================================
 def set_background(image_filename: str, opacity: float = 1.0):
     img_path = os.path.join(elementos_path, image_filename)
     if not os.path.exists(img_path):
-        # Aviso leve; não interrompe
-        st.markdown(f"<!-- Background {image_filename} não encontrado -->", unsafe_allow_html=True)
+        # fallback: não interrompe o app
+        st.warning(f"Fundo {image_filename} não encontrado em assets/Elementos.")
         return
     with open(img_path, "rb") as f:
         data = f.read()
     encoded = base64.b64encode(data).decode()
-    style = f"""
-    <style>
-    .app-background {{
-        background-image: url("data:image/png;base64,{encoded}");
-        opacity: {opacity};
-    }}
-    </style>
-    <div class="app-background"></div>
-    """
-    st.markdown(style, unsafe_allow_html=True)
+    st.markdown(
+        f"""
+        <style>
+        .app-background {{
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: {opacity};
+            background-image: url("data:image/png;base64,{encoded}");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+        }}
+        </style>
+        <div class="app-background"></div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 # ============================================================
-# AUTENTICAÇÃO (fixa e obrigatória)
+# AÇÕES por query param (back/logout)
+# ============================================================
+params = st.experimental_get_query_params()
+if "action" in params:
+    action = params.get("action")[0]
+    if action == "back":
+        st.session_state["pagina"] = "info"
+        # limpa o param ao reiniciar
+        st.experimental_set_query_params()
+        st.experimental_rerun()
+    if action == "logout":
+        # limpa sessão e força login
+        for k in list(st.session_state.keys()):
+            del st.session_state[k]
+        st.session_state["autenticado"] = False
+        st.experimental_set_query_params()
+        st.experimental_rerun()
+
+# ============================================================
+# AUTENTICAÇÃO FIXA E OBRIGATÓRIA
 # ============================================================
 HARDCODED_USER = "riccarevisao"
 HARDCODED_PASS = "Ricc@2026!"
 
 def login_page():
-    # background e logo
     set_background("Patterns Escuras-03.png", opacity=1)
     logo_vertical = os.path.join(logo_dir, "Vertical_Cor.png")
-    # posicionamento: esquerda em cima — usamos um layout com colunas
-    c1, c2 = st.columns([1, 3])
-    with c1:
-        if os.path.exists(logo_vertical):
-            st.image(logo_vertical, width=240)  # grande na primeira página, fica à esquerda em cima
+    if os.path.exists(logo_vertical):
+        st.image(logo_vertical, width=300)
+    # Título único (corrigido: não duplicado)
+    st.title("Selo Ricca de Revisão")
+    st.subheader("Login de acesso interno")
+
+    user = st.text_input("Usuário")
+    password = st.text_input("Senha", type="password")
+
+    if st.button("Entrar"):
+        if user == HARDCODED_USER and password == HARDCODED_PASS:
+            st.session_state["autenticado"] = True
+            st.session_state["usuario"] = user
+            st.session_state["pagina"] = "info"
+            st.experimental_rerun()
         else:
-            st.markdown("<h3 class='ricca-title-bold'>Selo Ricca de Revisão</h3>", unsafe_allow_html=True)
-    with c2:
-        # titulo e subtitulo (estilo Aeonik Bold)
-        st.markdown("<h1 class='ricca-title-bold' style='font-size:32px;margin:0'>Selo Ricca de Revisão</h1>", unsafe_allow_html=True)
-        st.markdown("<h3 class='ricca-title-bold' style='font-size:18px;margin-top:6px'>Login</h3>", unsafe_allow_html=True)
+            st.error("Usuário ou senha incorretos.")
 
-    # Formulário para permitir submissão via Enter
-    with st.form("login_form"):
-        st.markdown("<div class='ricca-medium-16'>Usuário</div>", unsafe_allow_html=True)
-        user = st.text_input("", key="login_user", label_visibility="collapsed")
-        st.markdown("<div class='ricca-medium-16'>Senha</div>", unsafe_allow_html=True)
-        password = st.text_input("", type="password", key="login_pass", label_visibility="collapsed")
-        submitted = st.form_submit_button("Entrar")
-        if submitted:
-            if user == HARDCODED_USER and password == HARDCODED_PASS:
-                st.session_state["autenticado"] = True
-                st.session_state["usuario"] = user
-                st.session_state["pagina"] = "info"
-                st.experimental_rerun()
-            else:
-                st.error("Usuário ou senha incorretos.")
-
-# ============================================================
-# Inicializa session_state
-# ============================================================
+# Inicializações de session_state
 if "autenticado" not in st.session_state:
     st.session_state["autenticado"] = False
 if "pagina" not in st.session_state:
     st.session_state["pagina"] = "login"
 if "revisao_em_andamento" not in st.session_state:
     st.session_state["revisao_em_andamento"] = False
-# mantém campos previamente preenchidos
-if "nome_usuario" not in st.session_state:
-    st.session_state["nome_usuario"] = ""
-if "projeto" not in st.session_state:
-    st.session_state["projeto"] = ""
-if "time" not in st.session_state:
-    st.session_state["time"] = ""
-if "glossario" not in st.session_state:
-    st.session_state["glossario"] = ""
 
-# Se não autenticado, mostra login
+# Bloqueia acesso se não autenticado
 if not st.session_state["autenticado"]:
     login_page()
     st.stop()
 
 # ============================================================
-# PÁGINA 2: INFORMAÇÕES DO PROJETO (sem título grande, só labels)
+# PÁGINA 2: INFORMAÇÕES INICIAIS
 # ============================================================
 def info_page():
     set_background("Patterns-06.png", opacity=1)
     logo_horizontal = os.path.join(logo_dir, "Horizontal_Cor.png")
-    c1, c2 = st.columns([1, 3])
-    with c1:
-        if os.path.exists(logo_horizontal):
-            st.image(logo_horizontal, width=160)  # médio, à esquerda em cima
-    # Não exibir "Informações do projeto" como cabeçalho; apenas labels conforme pedido
-    with st.form("info_form"):
-        st.markdown("<div class='ricca-medium-20'>Seu nome</div>", unsafe_allow_html=True)
-        nome_usuario = st.text_input("", value=st.session_state.get("nome_usuario", ""), key="nome_input", label_visibility="collapsed")
-        st.markdown("<div class='ricca-medium-20'>Projeto</div>", unsafe_allow_html=True)
-        projeto = st.text_input("", value=st.session_state.get("projeto", ""), key="projeto_input", label_visibility="collapsed")
-        st.markdown("<div class='ricca-medium-20'>Time</div>", unsafe_allow_html=True)
-        # selectbox com estilo aplicado por CSS global
-        time_opcoes = ["Magenta", "Lilás", "Ouro", "Menta", "Patrulha", "Outro"]
-        initial = time_opcoes.index(st.session_state.get("time")) if st.session_state.get("time") in time_opcoes else 0
-        time_selecionado = st.selectbox("", options=time_opcoes, index=initial, key="time_select", label_visibility="collapsed")
+    if os.path.exists(logo_horizontal):
+        st.image(logo_horizontal, width=200)
+    st.header("Informações do Projeto")
 
-        # Rodapé com botões: Logout (cinza, à esquerda) e Próximo (magenta, à direita)
-        colL, colR = st.columns([1,1])
-        with colL:
-            # botão cinza: aplicamos um botão HTML para garantir estilo cinza (usar st.markdown com uma pequena forma)
-            if st.form_submit_button("Logout", on_click=None, key="logout_btn"):
-                # limpa sessão
-                keys = ["autenticado","usuario","nome_usuario","projeto","time","glossario","pagina","revisao_em_andamento"]
-                for k in keys:
-                    if k in st.session_state:
-                        del st.session_state[k]
-                st.session_state["autenticado"] = False
-                st.experimental_rerun()
-        with colR:
-            if st.form_submit_button("Próximo", key="next_btn"):
-                st.session_state["nome_usuario"] = nome_usuario
-                st.session_state["projeto"] = projeto
-                st.session_state["time"] = time_selecionado
-                st.session_state["pagina"] = "revisao"
-                st.experimental_rerun()
+    nome_usuario = st.text_input("Seu nome", value=st.session_state.get("nome_usuario", st.session_state.get("usuario", "")))
+    projeto = st.text_input("Nome do projeto", value=st.session_state.get("projeto", ""))
+    times = ["Magenta", "Lilás", "Ouro", "Menta", "Patrulha", "Outro"]
+    default_index = 0
+    if st.session_state.get("time") in times:
+        default_index = times.index(st.session_state.get("time"))
+    time_selecionado = st.selectbox("Time", times, index=default_index)
 
-# Se não for página de revisão, mostra info_page
+    st.info("Preencha os campos do projeto. O glossário será fornecido na página de revisão.")
+    cols = st.columns([1,1])
+    with cols[0]:
+        if st.button("Próximo"):
+            st.session_state["nome_usuario"] = nome_usuario
+            st.session_state["projeto"] = projeto
+            st.session_state["time"] = time_selecionado
+            st.session_state["pagina"] = "revisao"
+            st.experimental_rerun()
+    with cols[1]:
+        # Logout como link estilizado em cinza
+        logout_link = '<a class="ricca-btn-gray" href="?action=logout">Logout</a>'
+        st.markdown(logout_link, unsafe_allow_html=True)
+
+# Se a página atual não é revisao, exibe info_page
 if st.session_state.get("pagina") != "revisao":
     info_page()
     st.stop()
 
 # ============================================================
-# PÁGINA 3: REVISÃO (com glossário e botões conforme solicitado)
+# PÁGINA 3: REVISÃO (com Glossário, Voltar cinza, header maior)
 # ============================================================
 def montar_prompt(glossario_cliente: str) -> str:
     return f"""
@@ -283,44 +269,41 @@ Se não houver erros, retorne: "Nenhum erro identificado"
 def pagina_revisao():
     set_background("Patterns Escuras_Prancheta 1.png", opacity=1)
     logo_horizontal = os.path.join(logo_dir, "Horizontal_Cor.png")
-    c1, c2 = st.columns([1, 3])
-    with c1:
-        if os.path.exists(logo_horizontal):
-            st.image(logo_horizontal, width=160)
+    if os.path.exists(logo_horizontal):
+        st.image(logo_horizontal, width=150)
 
-    # Título principal em Aeonik Bold
-    st.markdown("<h2 class='ricca-title-bold' style='font-size:24px;margin:0'>Revisão ortográfica e editorial</h2>", unsafe_allow_html=True)
+    # Header maior e bold (classe ricca-h1)
+    st.markdown('<div class="ricca-h1">Revisão Ortográfica e Editorial</div>', unsafe_allow_html=True)
 
-    # Glossário: titulo estilizado e caixa com placeholder e cor magenta
-    st.markdown("<div class='ricca-medium-20' style='margin-top:12px'>Glossário do cliente</div>", unsafe_allow_html=True)
-    st.markdown(
-        "<div class='glossario-box'>Riccu, aqui você deve inserir os padrões do cliente, com uma regra por linha.<br/>Ex.:<br/>diretor = Diretor-Presidente<br/>empresa = Companhia<br/>funcionários = colaboradores</div>",
-        unsafe_allow_html=True,
-    )
-    # Input do glossário (text_area) com valor pré-carregado
-    gloss = st.text_area("", value=st.session_state.get("glossario", ""), key="gloss_input", height=140, label_visibility="collapsed")
-    # atualiza session
-    st.session_state["glossario"] = gloss
+    # Botão Voltar (link estilizado em cinza)
+    back_link = '<a class="ricca-btn-gray" href="?action=back">Voltar</a>'
+    st.markdown(back_link, unsafe_allow_html=True)
 
-    # Uploader do PDF
+    # Espaçamento
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # Glossário (na página 3)
+    st.markdown('<div class="ricca-glossary-note">Ricca, aqui você deve inserir os padrões do cliente, com uma regra por linha.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="ricca-glossary-note">Ex.:<br>diretor = Diretor-Presidente<br>empresa = Companhia<br>funcionários = colaboradores</div>', unsafe_allow_html=True)
+    glossario = st.text_area("Glossário", value=st.session_state.get("glossario", ""), placeholder="empresa = Companhia\ncolaborador(a) = funcionário(a)\nEstado - ES = Estado (ES)")
+
+    # Espaço extra entre glossário e uploader
+    st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
+
     uploaded_file = st.file_uploader("Selecione o PDF", type=["pdf"])
 
-    # Botões Voltar (cinza, esquerda) e Iniciar Revisão (magenta, direita)
-    col_back, col_run = st.columns([1,1])
-    with col_back:
-        # botão cinza: para aparência, usamos form_submit_button style via markdown wrapper
-        if st.button("Voltar"):
-            st.session_state["pagina"] = "info"
-            st.experimental_rerun()
-
-    with col_run:
-        iniciar = st.button("Iniciar revisão")
-        # Prevencao de multiplos cliques
-        if iniciar and not st.session_state.get("revisao_em_andamento", False):
+    # Botões de ação: Iniciar Revisão (padrão magenta)
+    if st.session_state.get("revisao_em_andamento", False):
+        st.warning("Revisão em andamento. Aguarde conclusão.")
+    else:
+        if uploaded_file and st.button("Iniciar Revisão"):
+            # salva glossário em sessão
+            st.session_state["glossario"] = glossario
             st.session_state["revisao_em_andamento"] = True
-            # inicia processamento
+
             start_time = time.time()
             texto_paginas = []
+
             with st.spinner("Extraindo texto..."):
                 try:
                     with pdfplumber.open(uploaded_file) as pdf:
@@ -328,7 +311,7 @@ def pagina_revisao():
                             texto = page.extract_text() or ""
                             texto_paginas.append((i, texto))
                 except Exception:
-                    st.error("Erro ao extrair texto do PDF. Verifique o arquivo (pode ser escaneado).")
+                    st.error("Erro ao extrair texto do PDF. Verifique o arquivo (talvez seja um PDF escaneado).")
                     st.session_state["revisao_em_andamento"] = False
                     return
 
@@ -340,9 +323,8 @@ def pagina_revisao():
                 return
 
             client = OpenAI(api_key=api_key)
-            prompt_base = montar_prompt(st.session_state.get("glossario", ""))
+            prompt = montar_prompt(st.session_state.get("glossario", ""))
 
-            # Processamento por página
             for pagina_num, texto in texto_paginas:
                 with st.spinner(f"Revisão da página {pagina_num} em andamento..."):
                     tentativa = 0
@@ -354,7 +336,7 @@ def pagina_revisao():
                                 model="gpt-4.1-mini",
                                 temperature=0,
                                 messages=[
-                                    {"role": "system", "content": prompt_base},
+                                    {"role": "system", "content": prompt},
                                     {"role": "user", "content": texto}
                                 ],
                             )
@@ -366,7 +348,6 @@ def pagina_revisao():
                             if not resultado:
                                 raise ValueError("Resposta vazia")
 
-                            # parse seguro
                             try:
                                 dados = json.loads(resultado)
                             except json.JSONDecodeError:
@@ -379,23 +360,24 @@ def pagina_revisao():
                                         "categoria": "Erro de processamento",
                                         "trecho": "—",
                                         "sugestao": "—",
-                                        "justificativa": f"Resposta da IA fora do formato JSON esperado (t:{tentativa})"
+                                        "justificativa": "Resposta da IA fora do formato JSON esperado"
                                     })
                                     sucesso = True
                                     break
 
+                            if isinstance(dados, str) and dados == "Nenhum erro identificado":
+                                sucesso = True
+                                break
+
                             if isinstance(dados, list):
                                 for item in dados:
                                     if isinstance(item, dict):
-                                        item.setdefault("categoria", "Ortografia")
+                                        item.setdefault("categoria", "Outro")
                                         item.setdefault("trecho", "—")
                                         item.setdefault("sugestao", "—")
                                         item.setdefault("justificativa", "—")
                                         item["pagina"] = pagina_num
                                         ocorrencias.append(item)
-                                sucesso = True
-                                break
-                            elif isinstance(dados, str) and dados == "Nenhum erro identificado":
                                 sucesso = True
                                 break
                             else:
@@ -408,6 +390,7 @@ def pagina_revisao():
                                 })
                                 sucesso = True
                                 break
+
                         except Exception:
                             if tentativa >= 3:
                                 ocorrencias.append({
@@ -425,7 +408,6 @@ def pagina_revisao():
             st.success(f"Revisão concluída em {total_time:.1f} segundos.")
             st.session_state["revisao_em_andamento"] = False
 
-            # Relatório em Excel
             if ocorrencias:
                 df = pd.DataFrame(ocorrencias)
                 df["usuário"] = st.session_state.get("nome_usuario", st.session_state.get("usuario", ""))
@@ -433,7 +415,9 @@ def pagina_revisao():
                 df["projeto"] = st.session_state.get("projeto", "")
                 df["tempo_s"] = total_time
                 df["custo_estimado_USD"] = len(texto_paginas) * 0.01
+
                 st.dataframe(df, use_container_width=True)
+
                 output = io.BytesIO()
                 df.to_excel(output, index=False, engine="openpyxl")
                 output.seek(0)
@@ -446,5 +430,5 @@ def pagina_revisao():
             else:
                 st.info("Nenhuma ocorrência identificada.")
 
-# Executa página de revisão
+# Executa a página de revisão
 pagina_revisao()
