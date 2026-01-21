@@ -1,6 +1,4 @@
 streamlit
-pandas
-language-tool-python
-PyMuPDF
+openai
 pdfplumber
-openpyxl
+pandas
