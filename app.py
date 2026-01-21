@@ -6,67 +6,16 @@ import time
 from PIL import Image
 from openai import OpenAI
 import base64
+import io
 
 # ============================================================
 # CONFIGURAÇÕES DE PÁGINA E FONTE
 # ============================================================
-st.markdown(
-    """
-    <style>
-    /* =====================================
-       Fonte Aeonik e cor do texto
-       ===================================== */
-    * {
-        font-family: 'Aeonik', sans-serif;
-        color: #000000;  /* Preto para textos gerais */
-    }
-
-     /* =====================================
-       Botões magenta com texto branco e Aeonik Bold
-       ===================================== */
-    div.stButton > button {
-        background-color: #FF00FF;  /* Magenta */
-        color: white;               /* Texto branco */
-        font-family: 'Aeonik-Bold', sans-serif !important; /* Aeonik Bold */
-        font-weight: bold;
-        border-radius: 8px;
-        padding: 0.5em 1.2em;
-        font-size: 16px;
-    }
-    div.stButton > button:hover {
-        background-color: #E600E6; /* Magenta mais escuro ao passar o mouse */
-    }
-
-    div.stButton > button:hover {
-        background-color: #E600E6; /* Tom mais escuro ao passar o mouse */
-    }
-
-    /* =====================================
-       Fundo branco do app
-       ===================================== */
-    .stApp {
-        background-color: #FFFFFF;
-    }
-
-    /* =====================================
-       Selectboxes - fundo grafite, texto branco, fonte Aeonik Regular
-       ===================================== */
-    div[data-baseweb="select"] > div > div > div > div {
-        background-color: #333333 !important; /* Fundo grafite escuro */
-        border-radius: 6px;
-    }
-    div[data-baseweb="select"] span,
-    div[data-baseweb="select"] div[class*="value"] {
-        color: white !important;              /* Texto selecionado e opções */
-        font-family: 'Aeonik-Regular', sans-serif !important; /* Aeonik Regular */
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
 st.set_page_config(page_title="Selo Ricca de Revisão", layout="wide")
 
-# Fontes Aeonik
+# ============================================================
+# CARREGANDO FONTES AEONIK
+# ============================================================
 def load_fonts():
     st.markdown(
         """
@@ -88,11 +37,39 @@ def load_fonts():
         }
         html, body, .stApp, .main {
             font-family: 'Aeonik', sans-serif;
-            background-color: white !important;
+            background-color: #FFFFFF !important;
+            color: #000000;
+        }
+
+        /* Botões magenta */
+        div.stButton > button {
+            background-color: #FF00FF;
+            color: white;
+            font-family: 'Aeonik-Bold', sans-serif !important;
+            font-weight: bold;
+            border-radius: 8px;
+            padding: 0.5em 1.2em;
+            font-size: 16px;
+        }
+        div.stButton > button:hover {
+            background-color: #E600E6;
+        }
+
+        /* Selectboxes */
+        div[data-baseweb="select"] > div > div > div > div {
+            background-color: #333333 !important;
+            border-radius: 6px;
+        }
+        div[data-baseweb="select"] span,
+        div[data-baseweb="select"] div[class*="value"] {
+            color: white !important;
+            font-family: 'Aeonik-Regular', sans-serif !important;
         }
         </style>
-        """, unsafe_allow_html=True
+        """,
+        unsafe_allow_html=True
     )
+
 load_fonts()
 
 # ============================================================
@@ -102,31 +79,35 @@ logo_path = "assets/logo.png"
 fonts_path = "assets/fonts"
 elementos_path = "assets/Elementos"
 
+# ============================================================
+# FUNÇÃO PARA DEFINIR FUNDO COM IMAGEM ATRÁS DE TUDO
+# ============================================================
 def set_background(image_filename, opacity=1.0):
     img_path = os.path.join(elementos_path, image_filename)
     with open(img_path, "rb") as f:
         data = f.read()
     encoded = base64.b64encode(data).decode()
- st.markdown(
-    """
-    <style>
-    /* =====================================
-       Fundo da página (imagem) ocupando toda a largura
-       ===================================== */
-    .app-background {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;       /* Ocupa toda a largura */
-        height: 100%;      /* Ocupa toda a altura */
-        z-index: -1;       /* Fica atrás de todos os elementos */
-        opacity: 0.6;      /* Ajuste de opacidade */
-        object-fit: cover;  /* Mantém proporção da imagem */
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+    st.markdown(
+        f"""
+        <style>
+        .app-background {{
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: {opacity};
+            background-image: url("data:image/png;base64,{encoded}");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+        }}
+        </style>
+        <div class="app-background"></div>
+        """,
+        unsafe_allow_html=True
+    )
 
 # ============================================================
 # LOGIN
@@ -214,13 +195,14 @@ Se não houver erros, retorne: "Nenhum erro identificado".
     if uploaded_file:
         if st.button("Iniciar Revisão"):
             start_time = time.time()
+            texto_paginas = []
+
             with st.spinner("Extraindo texto..."):
-                texto_paginas = []
                 with pdfplumber.open(uploaded_file) as pdf:
                     for i, page in enumerate(pdf.pages, start=1):
                         texto = page.extract_text() or ""
                         texto_paginas.append((i, texto))
-            
+
             ocorrencias = []
             client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
             prompt = montar_prompt(st.session_state["glossario"])
@@ -261,10 +243,9 @@ Se não houver erros, retorne: "Nenhum erro identificado".
                 df["time"] = st.session_state["time"]
                 df["projeto"] = st.session_state["projeto"]
                 df["tempo_s"] = total_time
-                df["custo_estimado_USD"] = len(texto_paginas) * 0.01  # exemplo
+                df["custo_estimado_USD"] = len(texto_paginas) * 0.01  # Exemplo de custo
                 st.dataframe(df, use_container_width=True)
                 
-                import io
                 output = io.BytesIO()
                 df.to_excel(output, index=False, engine="openpyxl")
                 st.download_button(
