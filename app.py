@@ -17,53 +17,88 @@ st.set_page_config(page_title="Selo Ricca de Revisão", layout="wide")
 # CARREGANDO FONTES AEONIK
 # ============================================================
 def load_fonts():
+    # Carrega as fontes Aeonik diretamente via CSS
     st.markdown(
         """
         <style>
         @font-face {
             font-family: 'Aeonik';
-            src: url('assets/fonts/Aeonik-Regular.otf') format('opentype');
+            src: url('https://raw.githubusercontent.com/SEU_USUARIO/SEU_REPOSITORIO/main/assets/fonts/Aeonik-Regular.otf') format('opentype');
             font-weight: 400;
         }
         @font-face {
             font-family: 'Aeonik';
-            src: url('assets/fonts/Aeonik-Medium.otf') format('opentype');
+            src: url('https://raw.githubusercontent.com/SEU_USUARIO/SEU_REPOSITORIO/main/assets/fonts/Aeonik-Medium.otf') format('opentype');
             font-weight: 500;
         }
         @font-face {
             font-family: 'Aeonik';
-            src: url('assets/fonts/Aeonik-Bold.otf') format('opentype');
+            src: url('https://raw.githubusercontent.com/SEU_USUARIO/SEU_REPOSITORIO/main/assets/fonts/Aeonik-Bold.otf') format('opentype');
             font-weight: 700;
         }
-        html, body, .stApp, .main {
-            font-family: 'Aeonik', sans-serif;
+
+        /* Aplicação global da fonte */
+        html, body, [class*="css"], [class*="st-"], .stApp, .main, p, div, h1, h2, h3, h4, h5, h6, span {
+            font-family: 'Aeonik', sans-serif !important;
+            color: #000000 !important;
+        }
+
+        /* Configuração de fundo */
+        .stApp {
             background-color: #FFFFFF !important;
-            color: #000000;
         }
 
         /* Botões magenta */
         div.stButton > button {
-            background-color: #FF00FF;
-            color: white;
-            font-family: 'Aeonik-Bold', sans-serif !important;
-            font-weight: bold;
-            border-radius: 8px;
-            padding: 0.5em 1.2em;
-            font-size: 16px;
+            background-color: #FF00FF !important;
+            color: white !important;
+            font-family: 'Aeonik', sans-serif !important;
+            font-weight: 700 !important;
+            border-radius: 8px !important;
+            padding: 0.5em 1.2em !important;
+            font-size: 16px !important;
+            border: none !important;
         }
         div.stButton > button:hover {
-            background-color: #E600E6;
+            background-color: #E600E6 !important;
+            color: white !important;
         }
 
         /* Selectboxes */
-        div[data-baseweb="select"] > div > div > div > div {
+        div[data-baseweb="select"] > div {
             background-color: #333333 !important;
-            border-radius: 6px;
+            border-radius: 6px !important;
+            border: none !important;
         }
+
         div[data-baseweb="select"] span,
-        div[data-baseweb="select"] div[class*="value"] {
+        div[data-baseweb="select"] div[data-testid="stMarkdown"] p,
+        div[data-baseweb="select"] svg {
             color: white !important;
-            font-family: 'Aeonik-Regular', sans-serif !important;
+            fill: white !important;
+        }
+
+        /* Dropdown menu items */
+        ul[role="listbox"] li {
+            background-color: #333333 !important;
+            color: white !important;
+            font-family: 'Aeonik', sans-serif !important;
+        }
+
+        /* Inputs de texto */
+        .stTextInput input, .stTextArea textarea {
+            color: #000000 !important;
+            font-family: 'Aeonik', sans-serif !important;
+        }
+
+        /* Ajuste para dataframes */
+        .stDataFrame {
+            font-family: 'Aeonik', sans-serif !important;
+        }
+
+        /* Ajuste para textos de spinner e mensagens */
+        .stSpinner, .stAlert, .stInfo {
+            font-family: 'Aeonik', sans-serif !important;
         }
         </style>
         """,
@@ -75,18 +110,24 @@ load_fonts()
 # ============================================================
 # PATHS DE ASSETS
 # ============================================================
-logo_path = "assets/logo.png"
-fonts_path = "assets/fonts"
+logo_path = "assets/logo"
 elementos_path = "assets/Elementos"
 
 # ============================================================
-# FUNÇÃO PARA DEFINIR FUNDO COM IMAGEM ATRÁS DE TUDO
+# FUNÇÃO PARA DEFINIR FUNDO COM IMAGEM
 # ============================================================
 def set_background(image_filename, opacity=1.0):
     img_path = os.path.join(elementos_path, image_filename)
+
+    # Verificar se o arquivo existe
+    if not os.path.exists(img_path):
+        st.warning(f"Imagem de fundo não encontrada: {img_path}")
+        return
+
     with open(img_path, "rb") as f:
         data = f.read()
     encoded = base64.b64encode(data).decode()
+
     st.markdown(
         f"""
         <style>
@@ -113,19 +154,30 @@ def set_background(image_filename, opacity=1.0):
 # LOGIN
 # ============================================================
 def login_page():
-    set_background("Patterns Escuras-03.png", opacity=1)
-    st.image(os.path.join(logo_path, "Vertical_Cor.png"), width=300)
-    st.title("Selo Ricca de Revisão")
-    st.subheader("Login de acesso interno")
-    
-    user = st.text_input("Usuário")
-    password = st.text_input("Senha", type="password")
-    
-    if st.button("Entrar"):
-        if user == "riccarevisao" and password == "Ricc@2026!":
-            st.session_state["autenticado"] = True
-        else:
-            st.error("Usuário ou senha incorretos.")
+    try:
+        set_background("Patterns Escuras-03.png", opacity=1)
+    except Exception as e:
+        st.error(f"Erro ao carregar imagem de fundo: {e}")
+
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        try:
+            st.image(os.path.join(logo_path, "Vertical_Cor.png"), width=300)
+        except Exception as e:
+            st.error(f"Erro ao carregar logo: {e}")
+
+        st.title("Selo Ricca de Revisão")
+        st.subheader("Login de acesso interno")
+
+        user = st.text_input("Usuário")
+        password = st.text_input("Senha", type="password")
+
+        if st.button("Entrar"):
+            if user == "riccarevisao" and password == "Ricc@2026!":
+                st.session_state["autenticado"] = True
+                st.experimental_rerun()
+            else:
+                st.error("Usuário ou senha incorretos.")
 
 if "autenticado" not in st.session_state:
     st.session_state["autenticado"] = False
@@ -138,13 +190,26 @@ if not st.session_state["autenticado"]:
 # PÁGINA DE INFORMAÇÕES INICIAIS
 # ============================================================
 def info_page():
-    set_background("Patterns-06.png", opacity=1)
-    st.image(os.path.join(logo_path, "Horizontal_Cor.png"), width=200)
+    try:
+        set_background("Patterns-06.png", opacity=1)
+    except Exception as e:
+        st.error(f"Erro ao carregar imagem de fundo: {e}")
+
+    try:
+        st.image(os.path.join(logo_path, "Horizontal_Cor.png"), width=200)
+    except Exception as e:
+        st.error(f"Erro ao carregar logo: {e}")
+
     st.header("Informações do Projeto")
-    nome_usuario = st.text_input("Seu nome")
-    projeto = st.text_input("Nome do projeto")
-    time_selecionado = st.selectbox("Time", ["Magenta", "Lilás", "Ouro", "Menta", "Patrulha", "Outro"])
-    
+
+    col1, col2 = st.columns(2)
+    with col1:
+        nome_usuario = st.text_input("Seu nome")
+        projeto = st.text_input("Nome do projeto")
+
+    with col2:
+        time_selecionado = st.selectbox("Time", ["Magenta", "Lilás", "Ouro", "Menta", "Patrulha", "Outro"])
+
     st.header("Glossário do cliente")
     st.info("Preencha o glossário conforme padrões do cliente (uma linha por regra): Ex.: diretor = Diretor-Presidente")
     glossario = st.text_area("Glossário", placeholder="empresa = Companhia\ncolaborador(a) = funcionário(a)\nEstado - ES = Estado (ES)")
@@ -155,8 +220,12 @@ def info_page():
         st.session_state["time"] = time_selecionado
         st.session_state["glossario"] = glossario
         st.session_state["pagina"] = "revisao"
+        st.experimental_rerun()
 
-if "pagina" not in st.session_state or st.session_state.get("pagina") != "revisao":
+if "pagina" not in st.session_state:
+    st.session_state["pagina"] = "info"
+
+if st.session_state.get("pagina") == "info":
     info_page()
     st.stop()
 
@@ -164,12 +233,20 @@ if "pagina" not in st.session_state or st.session_state.get("pagina") != "revisa
 # PÁGINA DE REVISÃO
 # ============================================================
 def pagina_revisao():
-    set_background("Patterns Escuras_Prancheta 1.png", opacity=1)
-    st.image(os.path.join(logo_path, "Horizontal_Cor.png"), width=150)
+    try:
+        set_background("Patterns Escuras_Prancheta 1.png", opacity=1)
+    except Exception as e:
+        st.error(f"Erro ao carregar imagem de fundo: {e}")
+
+    try:
+        st.image(os.path.join(logo_path, "Horizontal_Cor.png"), width=150)
+    except Exception as e:
+        st.error(f"Erro ao carregar logo: {e}")
+
     st.header("Revisão Ortográfica e Editorial")
-    
+
     uploaded_file = st.file_uploader("Selecione o PDF", type=["pdf"])
-    
+
     # Prompt base
     def montar_prompt(glossario_cliente):
         return f"""
@@ -198,18 +275,34 @@ Se não houver erros, retorne: "Nenhum erro identificado".
             texto_paginas = []
 
             with st.spinner("Extraindo texto..."):
-                with pdfplumber.open(uploaded_file) as pdf:
-                    for i, page in enumerate(pdf.pages, start=1):
-                        texto = page.extract_text() or ""
-                        texto_paginas.append((i, texto))
+                try:
+                    with pdfplumber.open(uploaded_file) as pdf:
+                        for i, page in enumerate(pdf.pages, start=1):
+                            texto = page.extract_text() or ""
+                            texto_paginas.append((i, texto))
+                except Exception as e:
+                    st.error(f"Erro ao processar o PDF: {e}")
+                    st.stop()
 
             ocorrencias = []
-            client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-            prompt = montar_prompt(st.session_state["glossario"])
+
+            try:
+                client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+                prompt = montar_prompt(st.session_state["glossario"])
+            except Exception as e:
+                st.error(f"Erro ao configurar OpenAI: {e}")
+                st.stop()
 
             # Processamento por página
-            for pagina_num, texto in texto_paginas:
-                with st.spinner(f"Revisão da página {pagina_num} em andamento..."):
+            progress_bar = st.progress(0)
+            status_text = st.empty()
+
+            for idx, (pagina_num, texto) in enumerate(texto_paginas):
+                status_text.text(f"Revisão da página {pagina_num} em andamento...")
+                progress_value = (idx / len(texto_paginas))
+                progress_bar.progress(progress_value)
+
+                try:
                     resposta = client.chat.completions.create(
                         model="gpt-4.1-mini",
                         temperature=0,
@@ -218,42 +311,13 @@ Se não houver erros, retorne: "Nenhum erro identificado".
                             {"role": "user", "content": texto}
                         ]
                     )
+
+                    resultado = resposta.choices[0].message.content
+
+                    # Tratamento da resposta
+                    if "Nenhum erro identificado" in resultado:
+                        continue
+
                     try:
-                        resultado = resposta.choices[0].message.content
-                        dados = eval(resultado)
-                        for item in dados:
-                            item["pagina"] = pagina_num
-                            ocorrencias.append(item)
-                    except Exception:
-                        ocorrencias.append({
-                            "pagina": pagina_num,
-                            "categoria": "Erro de processamento",
-                            "trecho": "—",
-                            "sugestao": "—",
-                            "justificativa": "Resposta da IA fora do formato esperado"
-                        })
-
-            total_time = time.time() - start_time
-            st.success(f"Revisão concluída em {total_time:.1f} segundos.")
-
-            # Relatório em Excel
-            if ocorrencias:
-                df = pd.DataFrame(ocorrencias)
-                df["usuário"] = st.session_state["nome_usuario"]
-                df["time"] = st.session_state["time"]
-                df["projeto"] = st.session_state["projeto"]
-                df["tempo_s"] = total_time
-                df["custo_estimado_USD"] = len(texto_paginas) * 0.01  # Exemplo de custo
-                st.dataframe(df, use_container_width=True)
-                
-                output = io.BytesIO()
-                df.to_excel(output, index=False, engine="openpyxl")
-                st.download_button(
-                    "Baixar relatório em Excel",
-                    data=output,
-                    file_name="selo_ricca_relatorio.xlsx"
-                )
-            else:
-                st.info("Nenhuma ocorrência identificada.")
-
-pagina_revisao()
+                        # Limpar o resultado para garantir que seja um JSON válido
+                        resultado = resultado.replace("
