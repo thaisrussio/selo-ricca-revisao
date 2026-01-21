@@ -51,7 +51,7 @@ st.markdown(
 # FUNÇÃO PARA FUNDO DE TELA (CAMADA ATRÁS)
 # ========================================
 def set_background(image_filename, opacity=0.5):
-    img_path = os.path.join(Elementos_path, image_filename)
+    img_path = os.path.join(elementos_path, image_filename)
     st.markdown(
         f"""
         <style>
