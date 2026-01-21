@@ -2,79 +2,163 @@ import streamlit as st
 import pdfplumber
 import pandas as pd
 from openai import OpenAI
-import json
-from io import BytesIO
+import re
+import base64
 
 # ============================================================
-# SELO RICCA DE REVISÃO – PLATAFORMA DE REVISÃO EM PDF
+# CONFIGURAÇÕES INICIAIS
 # ============================================================
-
 st.set_page_config(page_title="Selo Ricca de Revisão", layout="wide")
+st.markdown(
+    """
+    <style>
+    /* Fonte Aeonik */
+    @font-face {
+        font-family: "Aeonik";
+        src: url("assets/fonts/Aeonik-Regular.ttf") format("truetype");
+        font-weight: 400;
+        font-style: normal;
+    }
+    @font-face {
+        font-family: "Aeonik";
+        src: url("assets/fonts/Aeonik-Medium.ttf") format("truetype");
+        font-weight: 500;
+    }
+    @font-face {
+        font-family: "Aeonik";
+        src: url("assets/fonts/Aeonik-Bold.ttf") format("truetype");
+        font-weight: 700;
+    }
+    
+    html, body, [class*="css"]  {
+        font-family: "Aeonik", sans-serif;
+        background-color: #FFFFFF;
+        color: #1B1B1B;
+    }
+    
+    .stButton>button {
+        background-color: #E6007E;
+        color: white;
+        font-weight: 700;
+        border-radius: 10px;
+        padding: 10px 20px;
+        border: none;
+    }
 
-st.title("Selo Ricca de Revisão")
-st.caption("Plataforma de revisão ortográfica, gramatical e editorial para PDFs institucionais")
+    .stTextInput>div>input, .stSelectbox>div>div>div>input, .stTextArea>div>textarea {
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        padding: 8px;
+    }
 
-st.info(
-    "Esta plataforma realiza revisão automática assistida por IA.\n\n"
-    "• O resultado é um RELATÓRIO DE OCORRÊNCIAS (Excel).\n"
-    "• O texto NÃO é reescrito.\n"
-    "• Recomenda-se iniciar com PDFs curtos para controle de custos."
+    .stHeader, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
+        font-family: "Aeonik", sans-serif;
+    }
+
+    .logo {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 100;
+    }
+    </style>
+    """, unsafe_allow_html=True
 )
 
-st.divider()
+# ============================================================
+# SESSÃO STATE
+# ============================================================
+if "authenticated" not in st.session_state:
+    st.session_state.authenticated = False
+if "user_email" not in st.session_state:
+    st.session_state.user_email = ""
+if "user_name" not in st.session_state:
+    st.session_state.user_name = ""
+if "project" not in st.session_state:
+    st.session_state.project = ""
+if "team" not in st.session_state:
+    st.session_state.team = ""
 
 # ============================================================
-# PADRÕES DO CLIENTE
+# AUTENTICAÇÃO
 # ============================================================
+USERS = {
+    "thais.russio@riccari.com.br": "Ricc@2026!"
+}
 
-st.header("1. Padrões do Cliente")
+def login():
+    st.image("assets/logo.png/Vertical_Cor.png", width=150)
+    st.title("Selo Ricca de Revisão - Login")
+    email = st.text_input("E-mail")
+    password = st.text_input("Senha", type="password")
+    if st.button("Entrar"):
+        if email in USERS and USERS[email] == password:
+            st.session_state.authenticated = True
+            st.session_state.user_email = email
+            st.success("Login realizado com sucesso!")
+        else:
+            st.error("E-mail ou senha incorretos")
 
-col1, col2, col3 = st.columns(3)
+# ============================================================
+# PÁGINA INICIAL APÓS LOGIN
+# ============================================================
+def pagina_inicial():
+    st.image("assets/logo.png/Vertical_Cor.png", width=150)
+    st.title("Selo Ricca de Revisão")
+    st.subheader("Informações do usuário e projeto")
 
-with col1:
-    termo_instituicao = st.text_input("Termo para a instituição", placeholder="ex.: organização")
-
-with col2:
-    termo_equipe = st.text_input("Termo para a equipe", placeholder="ex.: colaboradores")
-
-with col3:
-    tom_texto = st.selectbox(
-        "Tom do texto",
-        [
-            "Sóbrio e institucional",
-            "Técnico",
-            "Leve e otimista",
-            "Resiliente e de superação"
-        ]
+    nome = st.text_input("Seu nome", value=st.session_state.user_name)
+    projeto = st.text_input("Projeto", value=st.session_state.project)
+    time = st.selectbox(
+        "Time",
+        ["Magenta", "Lilás", "Ouro", "Menta", "Patrulha", "Outro"],
+        index=0
     )
 
-diretrizes = st.text_area(
-    "Outras diretrizes de linguagem",
-    placeholder="Ex.: evitar voz passiva; manter linguagem impessoal"
-)
-
-glossario = st.text_area(
-    "Glossário do cliente (uma regra por linha: termo incorreto = termo correto)",
-    placeholder="empresa = companhia\nfuncionários = colaboradores"
-)
-
-st.divider()
+    if st.button("Iniciar Revisão"):
+        if nome.strip() == "" or projeto.strip() == "":
+            st.warning("Por favor, preencha nome e projeto antes de continuar")
+        else:
+            st.session_state.user_name = nome
+            st.session_state.project = projeto
+            st.session_state.team = time
+            st.session_state.ready_to_review = True
 
 # ============================================================
-# UPLOAD DO PDF
+# FUNÇÃO DE REVISÃO DE PDF
 # ============================================================
+def pagina_revisao():
+    st.image("assets/logo.png/Vertical_Cor.png", width=150)
+    st.subheader(f"Usuário: {st.session_state.user_name} | Projeto: {st.session_state.project} | Time: {st.session_state.team}")
+    st.info(
+        "Faça upload de PDFs curtos para revisão. O relatório será gerado em Excel com ocorrências encontradas."
+    )
 
-st.header("2. Documento para Revisão")
-uploaded_file = st.file_uploader("Selecione o arquivo PDF", type=["pdf"])
+    # Campos de padrões do cliente
+    st.header("Padrões do Cliente")
+    termo_instituicao = st.text_input("Termo para a instituição", placeholder="ex.: organização")
+    termo_equipe = st.text_input("Termo para a equipe", placeholder="ex.: colaboradores")
+    tom_texto = st.selectbox("Tom do texto", ["Sóbrio e institucional", "Técnico", "Leve e otimista", "Resiliente e de superação"])
+    diretrizes = st.text_area("Outras diretrizes de linguagem", placeholder="Ex.: evitar voz passiva")
+    glossario = st.text_area("Glossário do cliente (uma regra por linha: termo incorreto = termo correto)")
 
-# ============================================================
-# PROMPT BASE
-# ============================================================
+    st.header("Upload do PDF")
+    uploaded_file = st.file_uploader("Selecione o arquivo PDF", type=["pdf"])
 
-def montar_prompt(padroes):
-    return f"""
+    if uploaded_file and st.button("Iniciar revisão"):
+        client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+
+        padroes = {
+            "instituicao": termo_instituicao or "não definido",
+            "equipe": termo_equipe or "não definido",
+            "tom": tom_texto,
+            "diretrizes": diretrizes or "nenhuma",
+            "glossario": glossario or "não informado"
+        }
+
+        prompt_sistema = f"""
 Você é um revisor editorial profissional especializado em relatórios institucionais
-e de sustentabilidade em português do Brasil.
+em português do Brasil.
 
 TAREFA:
 Analise o texto fornecido SEM reescrevê-lo.
@@ -82,12 +166,8 @@ Analise o texto fornecido SEM reescrevê-lo.
 REGRAS OBRIGATÓRIAS:
 1. Não reescreva o texto.
 2. Não devolva o texto corrigido.
-3. Apenas IDENTIFIQUE e LISTE ocorrências.
-4. Se NÃO houver erros, responda com:
-   {{
-     "status": "Texto em conformidade",
-     "ocorrencias": []
-   }}
+3. Apenas identifique e liste ocorrências de erro ou inconsistência.
+4. Caso não haja erros, informe explicitamente: "Texto em conformidade".
 
 PADRÕES DO CLIENTE:
 - Termo para instituição: {padroes['instituicao']}
@@ -96,43 +176,21 @@ PADRÕES DO CLIENTE:
 - Diretrizes adicionais: {padroes['diretrizes']}
 - Glossário: {padroes['glossario']}
 
-FORMATO DE SAÍDA (JSON OBRIGATÓRIO):
-{{
-  "status": "Com ocorrências | Texto em conformidade",
-  "ocorrencias": [
-    {{
-      "categoria": "Ortografia | Gramática | Numeração | Terminologia | Estilo | ODS | Elementos Visuais",
-      "trecho": "trecho original",
-      "sugestao": "sugestão de correção",
-      "justificativa": "fundamentação técnica"
-    }}
-  ]
-}}
+FORMATO DE SAÍDA (OBRIGATÓRIO – JSON):
+[
+  {{
+    "pagina": "número da página",
+    "categoria": "Ortografia | Gramática | Numeração | Terminologia | Estilo | ODS | Elementos Visuais",
+    "trecho": "trecho original",
+    "sugestao": "sugestão de correção",
+    "justificativa": "fundamentação técnica"
+  }}
+]
 """
+        ocorrencias = []
 
-# ============================================================
-# PROCESSAMENTO
-# ============================================================
-
-if uploaded_file and st.button("Iniciar revisão"):
-
-    client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-
-    padroes = {
-        "instituicao": termo_instituicao or "não definido",
-        "equipe": termo_equipe or "não definido",
-        "tom": tom_texto,
-        "diretrizes": diretrizes or "nenhuma",
-        "glossario": glossario or "não informado"
-    }
-
-    prompt_sistema = montar_prompt(padroes)
-    registros = []
-
-    with st.spinner("Revisando documento..."):
         with pdfplumber.open(uploaded_file) as pdf:
-            for numero_pagina, page in enumerate(pdf.pages, start=1):
-
+            for i, page in enumerate(pdf.pages, start=1):
                 texto = page.extract_text()
                 if not texto:
                     continue
@@ -146,48 +204,58 @@ if uploaded_file and st.button("Iniciar revisão"):
                     ]
                 )
 
-                conteudo = resposta.choices[0].message.content
-
                 try:
-                    resultado = json.loads(conteudo)
-
-                    for item in resultado.get("ocorrencias", []):
-                        registros.append({
-                            "Página": numero_pagina,
-                            "Categoria": item.get("categoria"),
-                            "Trecho": item.get("trecho"),
-                            "Sugestão": item.get("sugestao"),
-                            "Justificativa": item.get("justificativa")
-                        })
-
-                except json.JSONDecodeError:
-                    registros.append({
-                        "Página": numero_pagina,
-                        "Categoria": "Erro de processamento",
-                        "Trecho": "—",
-                        "Sugestão": "—",
-                        "Justificativa": "Resposta fora do formato JSON esperado"
+                    resultado = resposta.choices[0].message.content
+                    dados = eval(resultado)
+                    for item in dados:
+                        item["pagina"] = i
+                        ocorrencias.append(item)
+                except Exception:
+                    ocorrencias.append({
+                        "pagina": i,
+                        "categoria": "Erro de processamento",
+                        "trecho": "—",
+                        "sugestao": "—",
+                        "justificativa": "Resposta da IA fora do formato esperado"
                     })
 
-    # ========================================================
-    # RELATÓRIO
-    # ========================================================
+        if ocorrencias:
+            df = pd.DataFrame(ocorrencias)
+            st.success("Revisão concluída. Relatório gerado.")
+            st.dataframe(df, use_container_width=True)
 
-    if registros:
-        df = pd.DataFrame(registros)
+            # Botão para download
+            df_bytes = df.to_excel(index=False, engine='openpyxl')
+            st.download_button(
+                "Baixar relatório em Excel",
+                data=df_bytes,
+                file_name=f"{st.session_state.project}_relatorio_revisao.xlsx"
+            )
+        else:
+            st.info("Nenhuma ocorrência identificada. Texto em conformidade.")
 
-        st.success("Revisão concluída. Relatório gerado.")
-        st.dataframe(df, use_container_width=True)
+        # Registro interno
+        log_entry = pd.DataFrame([{
+            "usuario": st.session_state.user_name,
+            "email": st.session_state.user_email,
+            "projeto": st.session_state.project,
+            "time": st.session_state.team,
+            "num_paginas": len(pdf.pages),
+            "num_ocorrencias": len(ocorrencias)
+        }])
+        try:
+            log_df = pd.read_excel("registro_uso.xlsx", engine='openpyxl')
+            log_df = pd.concat([log_df, log_entry], ignore_index=True)
+        except FileNotFoundError:
+            log_df = log_entry
+        log_df.to_excel("registro_uso.xlsx", index=False, engine='openpyxl')
 
-        buffer = BytesIO()
-        df.to_excel(buffer, index=False)
-        buffer.seek(0)
-
-        st.download_button(
-            label="Baixar relatório em Excel",
-            data=buffer,
-            file_name="selo_ricca_relatorio_revisao.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
-    else:
-        st.info("Nenhuma ocorrência identificada. Texto em conformidade.")
+# ============================================================
+# FLUXO PRINCIPAL
+# ============================================================
+if not st.session_state.authenticated:
+    login()
+elif st.session_state.authenticated and not st.session_state.get("ready_to_review", False):
+    pagina_inicial()
+else:
+    pagina_revisao()
