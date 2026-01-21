@@ -65,18 +65,6 @@ st.markdown(
     unsafe_allow_html=True
 )
 st.set_page_config(page_title="Selo Ricca de Revisão", layout="wide")
-from PIL import Image
-
-# Carregar e exibir a imagem de fundo
-bg_image = Image.open("assets/Elementos/Patterns Escuras-03.png")  # substitua pela imagem da página
-st.image(
-    bg_image,
-    use_column_width=True,   # cobre toda a largura
-    output_format="PNG",
-    caption=None,
-    channels="RGB",
-    clamp=False
-)
 
 # Fontes Aeonik
 def load_fonts():
@@ -106,6 +94,18 @@ def load_fonts():
         """, unsafe_allow_html=True
     )
 load_fonts()
+from PIL import Image
+
+# Carregar e exibir a imagem de fundo
+bg_image = Image.open("assets/Elementos/Patterns Escuras-03.png")  # substitua pela imagem da página
+st.image(
+    bg_image,
+    use_column_width=True,   # cobre toda a largura
+    output_format="PNG",
+    caption=None,
+    channels="RGB",
+    clamp=False
+)
 
 # ============================================================
 # PATHS DE ASSETS
