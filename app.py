@@ -6,6 +6,51 @@ from openai import OpenAI
 import os
 import time
 
+
+# ============================================================
+# Configuração de página
+# ============================================================
+st.set_page_config(page_title="Selo Ricca de Revisão", layout="wide")
+
+# ============================================================
+# CSS para o botão magenta e fonte Aeonik
+# ============================================================
+st.markdown(
+    """
+    <style>
+    @font-face {
+        font-family: 'Aeonik';
+        src: url('assets/fonts/Aeonik-Regular.otf') format('opentype');
+    }
+    html, body, [class*="css"]  {
+        font-family: 'Aeonik', sans-serif;
+    }
+
+    /* Botão magenta */
+    div.stButton > button {
+        background-color: #FF00FF;
+        color: white;
+        font-weight: bold;
+        font-family: 'Aeonik', sans-serif;
+        padding: 10px 24px;
+        border-radius: 8px;
+    }
+    
+    div.stButton > button:active {
+        background-color: #CC00CC;
+        transform: scale(0.98);
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# ============================================================
+# Exemplo de uso do botão
+# ============================================================
+if st.button("Iniciar Revisão"):
+    st.write("Revisão em andamento...")
+
 # ======================
 # CONFIGURAÇÃO DO STREAMLIT
 # ======================
