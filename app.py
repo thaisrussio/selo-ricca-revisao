@@ -94,16 +94,6 @@ def load_fonts():
         """, unsafe_allow_html=True
     )
 load_fonts()
-from PIL import Image
-bg_image = Image.open("assets/Elementos/Patterns Escuras-03.png")  # substitua pela imagem da página
-st.image(
-    bg_image,
-    use_column_width=True,   # cobre toda a largura
-    output_format="PNG",
-    caption=None,
-    channels="RGB",
-    clamp=False
-)
 
 # ============================================================
 # PATHS DE ASSETS
