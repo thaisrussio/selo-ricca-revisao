@@ -2,4 +2,5 @@ streamlit
 pandas
 language-tool-python
 PyMuPDF
+pdfplumber
 openpyxl
