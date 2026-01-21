@@ -345,4 +345,4 @@ Se não houver erros, retorne: "Nenhum erro identificado".
 
                     try:
                         # Limpar o resultado para garantir que seja um JSON válido
-                        resultado = resultado.replace("
+                        resultado = resultado.replace
