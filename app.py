@@ -126,11 +126,6 @@ def inject_global_css():
             border-radius: 10px !important;
             border: 1px solid var(--ricca-grafite) !important;
         }}
-        div[data-testid="stSelectbox"] [data-baseweb="select"] span,
-div[data-testid="stSelectbox"] [data-baseweb="select"] div {
-    color: #FFFFFF !important;
-    -webkit-text-fill-color: #FFFFFF !important;
-}
         div[data-baseweb="select"] span {{
             color: var(--ricca-branco) !important;
             font-family: 'Aeonik', sans-serif !important;
@@ -153,7 +148,15 @@ div[data-testid="stSelectbox"] [data-baseweb="select"] div {
             font-family: 'Aeonik', sans-serif !important;
             font-weight: 400 !important;
         }}
-
+/* === GARANTE TEXTO BRANCO NO SELECTBOX (VALOR SELECIONADO) === */
+div[data-baseweb="select"] *,
+div[data-baseweb="select"] span,
+div[data-baseweb="select"] input,
+div[data-baseweb="select"] div {
+    color: #FFFFFF !important;
+    font-family: 'Aeonik', sans-serif !important;
+    font-weight: 400 !important;
+}
         /* ============================================================
            FILE UPLOADER: grafite + texto branco
            ============================================================ */
@@ -357,7 +360,7 @@ def pagina_info():
     with col2:
         time_sel = st.selectbox(
             "Time",
-            ["Magenta", "Lilás", "Ouro", "Menta", "Patrulha", "Outro"],
+            [ "Lilás", "Magenta", "Menta", "Ouro", "Patrulha", "Outro"],
             key="time_sel",
         )
 
