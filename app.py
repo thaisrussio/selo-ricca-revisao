@@ -15,11 +15,11 @@ st.set_page_config(page_title="Selo Ricca de Revisão", layout="wide")
 assets_path = os.path.join(os.getcwd(), "assets")
 logo_path = os.path.join(assets_path, "logo.png")
 fonts_path = os.path.join(assets_path, "fonts")
-elementos_path = os.path.join(assets_path, "Elementos")
+Elementos_path = os.path.join(assets_path, "Elementos")
 
 # Função para carregar imagens
 def load_image(subfolder, filename):
-    return Image.open(os.path.join(elementos_path if subfolder=="Elementos" else logo_path, filename))
+    return Image.open(os.path.join(Elementos_path if subfolder=="Elementos" else logo_path, filename))
 
 # ======================
 # FONTE AEONIK
@@ -64,7 +64,7 @@ def login_page():
         f"""
         <style>
         .stApp {{
-            background-image: url("file://{os.path.join(elementos_path,'Patterns Escuras-03.png')}");
+            background-image: url("file://{os.path.join(Elementos_path,'Patterns Escuras-03.png')}");
             background-size: cover;
             background-repeat: no-repeat;
             background-position: center;
