@@ -34,8 +34,7 @@ BG_INFO = "Patterns-06.png"
 BG_REVISAO = "Patterns Escuras_Prancheta 1.png"
 
 # Tamanho do logo horizontal nas páginas 2 e 3 (ajuste aqui se quiser)
-LOGO_HORIZONTAL_WIDTH = 180
-
+LOGO_HORIZONTAL_WIDTH = 250
 
 # ============================================================
 # 3) CSS GLOBAL
