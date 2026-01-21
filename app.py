@@ -30,6 +30,7 @@ st.markdown(
         font-weight: bold;
         border-radius: 8px;
         padding: 0.5em 1.2em;
+        color: #FFF
         font-size: 16px;
         font-family: 'Aeonik'!important;
     }
