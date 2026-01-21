@@ -93,7 +93,7 @@ uploaded_file = st.file_uploader("Selecione o arquivo PDF", type=["pdf"])
 # ============================================================
 
 if uploaded_file and st.button("Iniciar revisão"):
-    tool = language_tool_python.LanguageTool('pt-BR')
+    tool = language_tool_python.LanguageToolPublicAPI('pt-BR')
     erros = []
 
     with pdfplumber.open(uploaded_file) as pdf:
