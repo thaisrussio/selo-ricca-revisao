@@ -95,8 +95,6 @@ def load_fonts():
     )
 load_fonts()
 from PIL import Image
-
-# Carregar e exibir a imagem de fundo
 bg_image = Image.open("assets/Elementos/Patterns Escuras-03.png")  # substitua pela imagem da página
 st.image(
     bg_image,
