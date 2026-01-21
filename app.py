@@ -10,6 +10,26 @@ import base64
 # ============================================================
 # CONFIGURAÇÕES DE PÁGINA E FONTE
 # ============================================================
+st.markdown(
+    """
+    <style>
+    /* Botões principais */
+    div.stButton > button {
+        background-color: #FF00FF;  /* Magenta */
+        color: white;
+        font-weight: bold;
+        border-radius: 8px;
+        padding: 0.5em 1.2em;
+        font-family: 'Aeonik', sans-serif;
+        font-size: 16px;
+    }
+    div.stButton > button:hover {
+        background-color: #E600E6; /* Tom mais escuro ao passar o mouse */
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 st.set_page_config(page_title="Selo Ricca de Revisão", layout="wide")
 
 # Fontes Aeonik
