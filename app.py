@@ -13,41 +13,54 @@ import base64
 st.markdown(
     """
     <style>
-    /* Fonte Aeonik em todo o app */
+    /* =====================================
+       Fonte Aeonik e cor do texto
+       ===================================== */
     * {
         font-family: 'Aeonik', sans-serif;
         color: #000000;  /* Preto para textos gerais */
     }
 
-    /* Botões principais */
+    /* =====================================
+       Botões magenta
+       ===================================== */
     div.stButton > button {
         background-color: #FF00FF;  /* Magenta */
-        color: white;               /* Texto do botão branco */
+        color: white;               /* Texto do botão */
         font-weight: bold;
         border-radius: 8px;
         padding: 0.5em 1.2em;
         font-size: 16px;
     }
     div.stButton > button:hover {
-        background-color: #E600E6; /* Magenta mais escuro ao passar o mouse */
+        background-color: #E600E6; /* Tom mais escuro ao passar o mouse */
     }
 
-    /* Fundo branco para todo o app */
+    /* =====================================
+       Fundo branco do app
+       ===================================== */
     .stApp {
         background-color: #FFFFFF;
     }
 
-    /* Texto do selectbox do "Time" em branco */
+    /* =====================================
+       Selectbox do "Time" - fundo grafite e texto branco
+       ===================================== */
     div[data-baseweb="select"] > div > div > div > div {
-        color: white !important;
+        background-color: #333333 !important; /* Fundo grafite escuro */
+        color: white !important;               /* Texto selecionado */
+        font-family: 'Aeonik', sans-serif !important;
+        border-radius: 6px;
     }
     div[data-baseweb="select"] span {
-        color: white !important;
+        color: white !important;              /* Texto das opções */
+        font-family: 'Aeonik', sans-serif !important;
     }
     </style>
     """,
     unsafe_allow_html=True
 )
+
 st.set_page_config(page_title="Selo Ricca de Revisão", layout="wide")
 
 # Fontes Aeonik
