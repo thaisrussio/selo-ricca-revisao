@@ -46,7 +46,7 @@ st.markdown(
         font-family: 'Aeonik', sans-serif;
     }}
     .stApp {{
-        background-color: #ffffff;
+        background-color: #FFF;
     }}
     </style>
     """,
@@ -57,17 +57,18 @@ st.markdown(
 # LOGIN
 # ======================
 def login_page():
-    pattern_bg = load_image("Elementos", "Patterns_Escuras-03.png")
+    pattern_bg = load_image("Elementos", "Patterns Escuras-03.png")
     logo = load_image("", "Vertical_Cor.png")
     st.image(logo, width=300)
     st.markdown(
         f"""
         <style>
         .stApp {{
-            background-image: url("file://{os.path.join(elementos_path,'Patterns_Escuras-03.png')}");
+            background-image: url("file://{os.path.join(elementos_path,'Patterns Escuras-03.png')}");
             background-size: cover;
             background-repeat: no-repeat;
             background-position: center;
+            background-color: #FFF;
         }}
         </style>
         """,
@@ -109,7 +110,7 @@ def info_page():
 # PÁGINA DE REVISÃO
 # ======================
 def review_page():
-    pattern_bg = load_image("Elementos", "Patterns_Escuras_Prancheta 1.png")
+    pattern_bg = load_image("Elementos", "Patterns Escuras_Prancheta 1.png")
     logo = load_image("", "Horizontal_Cor.png")
     st.image(logo, width=200)
 
