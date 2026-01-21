@@ -21,19 +21,22 @@ st.markdown(
         color: #000000;  /* Preto para textos gerais */
     }
 
-    /* =====================================
-       Botões magenta
+     /* =====================================
+       Botões magenta com texto branco e Aeonik Bold
        ===================================== */
     div.stButton > button {
         background-color: #FF00FF;  /* Magenta */
-        color: #FFF;               /* Texto do botão */
+        color: white;               /* Texto branco */
+        font-family: 'Aeonik-Bold', sans-serif !important; /* Aeonik Bold */
         font-weight: bold;
         border-radius: 8px;
         padding: 0.5em 1.2em;
-        color: #FFF
         font-size: 16px;
-        font-family: 'Aeonik'!important;
     }
+    div.stButton > button:hover {
+        background-color: #E600E6; /* Magenta mais escuro ao passar o mouse */
+    }
+
     div.stButton > button:hover {
         background-color: #E600E6; /* Tom mais escuro ao passar o mouse */
     }
@@ -46,23 +49,21 @@ st.markdown(
     }
 
     /* =====================================
-       Selectbox - fundo grafite e texto branco
+       Selectboxes - fundo grafite, texto branco, fonte Aeonik Regular
        ===================================== */
     div[data-baseweb="select"] > div > div > div > div {
         background-color: #333333 !important; /* Fundo grafite escuro */
-        color: white !important;               /* Texto selecionado */
-        font-family: 'Aeonik' !important;
         border-radius: 6px;
     }
-    div[data-baseweb="select"] span {
-        color: white !important;              /* Texto das opções */
-        font-family: 'Aeonik' !important;
+    div[data-baseweb="select"] span,
+    div[data-baseweb="select"] div[class*="value"] {
+        color: white !important;              /* Texto selecionado e opções */
+        font-family: 'Aeonik-Regular', sans-serif !important; /* Aeonik Regular */
     }
     </style>
     """,
     unsafe_allow_html=True
 )
-
 st.set_page_config(page_title="Selo Ricca de Revisão", layout="wide")
 
 # Fontes Aeonik
