@@ -13,6 +13,18 @@ import base64
 st.markdown(
     """
     <style>
+    /* Fonte Aeonik em todo o app */
+    * {
+        font-family: 'Aeonik', sans-serif;
+        color: #000000;  /* Preto */
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+st.markdown(
+    """
+    <style>
     /* Botões principais */
     div.stButton > button {
         background-color: #FF00FF;  /* Magenta */
