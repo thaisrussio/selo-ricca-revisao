@@ -193,8 +193,3 @@ Se não houver erros, retorne: "Nenhum erro identificado".
 
                     if "Nenhum erro identificado" in resultado:
                         continue
-
-                    # -------- LINHA QUE DAVA ERRO (agora com parênteses) --------
-                    clean_result = (
-                        resultado
-                        .replace("
