@@ -26,11 +26,12 @@ st.markdown(
        ===================================== */
     div.stButton > button {
         background-color: #FF00FF;  /* Magenta */
-        color: white;               /* Texto do botão */
+        color: #FFF;               /* Texto do botão */
         font-weight: bold;
         border-radius: 8px;
         padding: 0.5em 1.2em;
         font-size: 16px;
+        font-family: 'Aeonik'!important;
     }
     div.stButton > button:hover {
         background-color: #E600E6; /* Tom mais escuro ao passar o mouse */
@@ -44,17 +45,17 @@ st.markdown(
     }
 
     /* =====================================
-       Selectbox do "Time" - fundo grafite e texto branco
+       Selectbox - fundo grafite e texto branco
        ===================================== */
     div[data-baseweb="select"] > div > div > div > div {
         background-color: #333333 !important; /* Fundo grafite escuro */
         color: white !important;               /* Texto selecionado */
-        font-family: 'Aeonik', sans-serif !important;
+        font-family: 'Aeonik' !important;
         border-radius: 6px;
     }
     div[data-baseweb="select"] span {
         color: white !important;              /* Texto das opções */
-        font-family: 'Aeonik', sans-serif !important;
+        font-family: 'Aeonik' !important;
     }
     </style>
     """,
