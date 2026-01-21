@@ -296,7 +296,9 @@ def pagina_login():
 def pagina_info():
     set_background_image(BG_INFO, opacity=1)
 
-    st.image(LOGO_HORIZONTAL, width=220, use_column_width=False)
+    col_logo, col_space = st.columns([1, 5])
+with col_logo:
+    st.image(LOGO_HORIZONTAL, width=180)
 
     st.markdown("<h2 style='margin-top:8px;'>Informações iniciais</h2>", unsafe_allow_html=True)
 
@@ -331,7 +333,9 @@ def pagina_info():
 def pagina_revisao():
     set_background_image(BG_REVISAO, opacity=1)
 
-    st.image(LOGO_HORIZONTAL, width=220, use_column_width=False)
+    col_logo, col_space = st.columns([1, 5])
+with col_logo:
+    st.image(LOGO_HORIZONTAL, width=180)
     st.markdown("<h2 style='margin-top:8px;'>Revisão em PDF</h2>", unsafe_allow_html=True)
 
     st.info(
