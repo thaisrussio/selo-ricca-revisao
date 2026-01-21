@@ -1,209 +1,205 @@
 import streamlit as st
 from PIL import Image
-import os
 import pdfplumber
 import pandas as pd
 from openai import OpenAI
 import time
-from io import BytesIO
+import os
 
-# ============================================================
-# Configuração de página
-# ============================================================
+# ========================================
+# CONFIGURAÇÕES INICIAIS
+# ========================================
 st.set_page_config(page_title="Selo Ricca de Revisão", layout="wide")
 
-# ============================================================
 # Caminhos
-# ============================================================
-assets_path = "assets"
+logo_path = "assets/logo.png"
+elementos_path = "assets/Elementos"
+fonts_path = "assets/fonts"
 
-logo_path = os.path.join(assets_path, "logo.png")
-fonts_path = os.path.join(assets_path, "fonts")
-elementos_path = os.path.join(assets_path, "Elementos")
-
-# ============================================================
-# CSS
-# ============================================================
+# Fonte Aeonik
 st.markdown(
     f"""
     <style>
     @font-face {{
         font-family: 'Aeonik';
-        src: url('{fonts_path}/Aeonik-Regular.otf') format('opentype');
+        src: url('{fonts_path}/Aeonik-Regular.otf');
         font-weight: normal;
     }}
     @font-face {{
         font-family: 'Aeonik';
-        src: url('{fonts_path}/Aeonik-Bold.otf') format('opentype');
+        src: url('{fonts_path}/Aeonik-Bold.otf');
         font-weight: bold;
     }}
     @font-face {{
         font-family: 'Aeonik';
-        src: url('{fonts_path}/Aeonik-Medium.otf') format('opentype');
+        src: url('{fonts_path}/Aeonik-Medium.otf');
         font-weight: 500;
     }}
-
     html, body, [class*="css"] {{
         font-family: 'Aeonik', sans-serif;
     }}
-
-    /* Botão magenta */
-    div.stButton > button {{
-        background-color: #FFF;
+    .stButton>button {{
+        background-color: #FF00FF;
         color: white;
-        font-weight: bold;
-        font-family: 'Aeonik', sans-serif;
-        padding: 10px 24px;
-        border-radius: 8px;
-    }}
-    
-    div.stButton > button:active {{
-        background-color: #CC00CC;
-        transform: scale(0.98);
-    }}
-
-    .background-image {{
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: auto;
-        height: auto;
-        pointer-events: none;
-        z-index: -1;
-    
-        opacity: 0.5;
     }}
     </style>
-    <img src="{bg_image}" class="bg-layer">
     """,
     unsafe_allow_html=True
 )
 
-# ============================================================
-# Função para carregar imagens
-# ============================================================
-def load_image(subfolder, filename):
-    if subfolder == "Elementos":
-        path = os.path.join(elementos_path, filename)
-    elif subfolder == "logo":
-        path = os.path.join(logo_path, filename)
-    else:
-        path = os.path.join(assets_path, filename)
-    return Image.open(path)
+# ========================================
+# FUNÇÃO PARA FUNDO DE TELA (CAMADA ATRÁS)
+# ========================================
+def set_background(image_filename, opacity=0.5):
+    img_path = os.path.join(Elementos_path, image_filename)
+    st.markdown(
+        f"""
+        <style>
+        .bg-layer {{
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: auto;
+            height: auto;
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0,5;
+        }}
+        </style>
+        <img src="{img_path}" class="bg-layer">
+        """,
+        unsafe_allow_html=True
+    )
 
-# ============================================================
-# Páginas
-# ============================================================
-
+# ========================================
+# PÁGINA DE LOGIN
+# ========================================
 def login_page():
-    st.title("Selo Ricca de Revisão")
-    # Logo centralizado
-    logo = load_image("logo", "Vertical_Cor.png")
-    st.image(logo, use_column_width=False, width=300)
+    set_background("Patterns Escuras-03.png", opacity=0.6)
+    st.image(f"{logo_path}/Vertical_Cor.png", width=300)
 
-    # Background
-    bg = load_image("Elementos", "Patterns Escuras-03.png")
-    st.image(bg, use_column_width=True, output_format="PNG", clamp=True)
-
+    st.subheader("Login Selo Ricca de Revisão")
     username = st.text_input("Usuário")
     password = st.text_input("Senha", type="password")
-    
-    if st.button("Próximo"):
+
+    if st.button("Entrar"):
         if username == "riccarevisao" and password == "Ricc@2026!":
-            st.session_state.authenticated = True
-            st.session_state.page = 2
+            st.session_state["logged_in"] = True
         else:
             st.error("Usuário ou senha incorretos")
 
+# ========================================
+# PÁGINA DE INFORMAÇÕES INICIAIS
+# ========================================
 def info_page():
-    st.header("Preencha as informações do projeto")
-    
-    # Background
-    bg = load_image("Elementos", "Patterns-06.png")
-    st.image(bg, use_column_width=True, output_format="PNG", clamp=True)
-    
-    st.session_state.nome = st.text_input("Seu nome")
-    st.session_state.projeto = st.text_input("Projeto")
-    st.session_state.time = st.selectbox("Time", ["Magenta", "Lilás", "Ouro", "Menta", "Patrulha", "Outro"])
-    
-    st.session_state.glosario = st.text_area("Glossário do cliente (ex.: diretor = Diretor-Presidente)")
+    set_background("Patterns-06.png", opacity=0.5)
+    st.image(f"{logo_path}/Horizontal_Cor.png", width=200)
+
+    st.header("Informações do Projeto")
+    st.text_input("Seu nome", key="nome")
+    st.text_input("Projeto", key="projeto")
+    st.selectbox(
+        "Time", 
+        ["Magenta", "Lilás", "Ouro", "Menta", "Patrulha", "Outro"],
+        key="time"
+    )
+    st.text_area(
+        "Glossário do cliente (Ex.: diretor = Diretor-Presidente)",
+        key="glossario",
+        height=100
+    )
 
     if st.button("Próximo"):
-        st.session_state.page = 3
+        st.session_state["page"] = "revisao"
 
+# ========================================
+# PÁGINA DE REVISÃO
+# ========================================
 def revisao_page():
-    st.header("Selo Ricca de Revisão")
-    
-    # Background
-    bg = load_image("Elementos", "Patterns Escuras_Prancheta 1.png")
-    st.image(bg, use_column_width=True, output_format="PNG", clamp=True)
-    
-    # Logo horizontal
-    logo = load_image("logo", "Horizontal_Cor.png")
-    st.image(logo, width=200)
-    
-    uploaded_file = st.file_uploader("Selecione o arquivo PDF", type=["pdf"])
-    
-    if uploaded_file and st.button("Iniciar Revisão"):
-        start_time = time.time()
-        with st.spinner("Extraindo texto..."):
-            time.sleep(1)  # simulação
-            # Extração de texto
-            texto_paginas = []
-            with pdfplumber.open(uploaded_file) as pdf:
-                for i, page in enumerate(pdf.pages, start=1):
-                    texto_paginas.append((i, page.extract_text() or ""))
-        
-        with st.spinner("Revisão em andamento, aguarde mais um pouquinho..."):
-            time.sleep(1)  # simulação
-            # Aqui entraria a chamada da OpenAI API
-            ocorrencias = []
-            for i, texto in texto_paginas:
-                ocorrencias.append({
-                    "pagina": i,
-                    "categoria": "Ortografia",
-                    "trecho": "Exemplo de trecho",
-                    "sugestao": "Exemplo de correção",
-                    "justificativa": "Teste"
-                })
-        
-        with st.spinner("Gerando relatório de erros..."):
-            time.sleep(1)
-            end_time = time.time()
-            duracao = round(end_time - start_time, 2)
-            
-            df = pd.DataFrame(ocorrencias)
-            # Adiciona info do usuário e projeto
-            df["Usuário"] = st.session_state.nome
-            df["Projeto"] = st.session_state.projeto
-            df["Time"] = st.session_state.time
-            df["Tempo de revisão (s)"] = duracao
-            df["Custo estimado (USD)"] = round(duracao * 0.01, 2)  # exemplo custo
-            
-            st.success("Revisão concluída. Relatório gerado.")
-            st.dataframe(df)
-            
-            # Download Excel
-            output = BytesIO()
-            df.to_excel(output, index=False, engine="openpyxl")
-            st.download_button("Baixar relatório em Excel", data=output, file_name="selo_ricca_relatorio.xlsx")
+    set_background("Patterns Escuras_Prancheta 1.png", opacity=0.4)
+    st.image(f"{logo_path}/Horizontal_Cor.png", width=200)
 
-# ============================================================
-# Inicialização
-# ============================================================
-if "authenticated" not in st.session_state:
-    st.session_state.authenticated = False
-    st.session_state.page = 1
-    st.session_state.nome = ""
-    st.session_state.projeto = ""
-    st.session_state.time = ""
-    st.session_state.glosario = ""
+    st.header("Revisão Ortográfica")
+    uploaded_file = st.file_uploader("Selecione o PDF", type=["pdf"])
 
-# Controle de páginas
-if not st.session_state.authenticated:
+    if uploaded_file:
+        if st.button("Iniciar Revisão"):
+            start_time = time.time()
+            with st.spinner("Extraindo texto do PDF..."):
+                pages_text = []
+                with pdfplumber.open(uploaded_file) as pdf:
+                    for i, page in enumerate(pdf.pages, start=1):
+                        text = page.extract_text()
+                        pages_text.append((i, text))
+                time.sleep(1)
+
+            with st.spinner("Revisão em andamento, aguarde mais um pouquinho..."):
+                client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+                ocorrencias = []
+                for i, text in pages_text:
+                    # Prompt simplificado: usar o glossário do cliente
+                    glossario = st.session_state.get("glossario", "")
+                    prompt = f"""
+Você é revisor profissional. Não reescreva o texto. Use apenas o glossário abaixo.
+Glossário:
+{glossario}
+Texto:
+{text}
+Saída em JSON com campos: página, trecho, sugestão, tipo, observação
+"""
+                    response = client.chat.completions.create(
+                        model="gpt-4.1-mini",
+                        temperature=0,
+                        messages=[
+                            {"role": "system", "content": prompt},
+                        ]
+                    )
+                    try:
+                        resultado = eval(response.choices[0].message.content)
+                        for item in resultado:
+                            item["pagina"] = i
+                            ocorrencias.append(item)
+                    except Exception:
+                        ocorrencias.append({
+                            "pagina": i,
+                            "trecho": "—",
+                            "sugestao": "—",
+                            "tipo": "Erro de processamento",
+                            "observacao": "Resposta da IA fora do formato esperado"
+                        })
+                time.sleep(1)
+
+            with st.spinner("Gerando relatório de erros..."):
+                df = pd.DataFrame(ocorrencias)
+                end_time = time.time()
+                df["tempo_segundos"] = round(end_time - start_time, 2)
+                df["nome"] = st.session_state.get("nome", "")
+                df["projeto"] = st.session_state.get("projeto", "")
+                df["time"] = st.session_state.get("time", "")
+                st.success("Revisão concluída. Relatório gerado.")
+                st.dataframe(df)
+
+                # Baixar Excel
+                output_file = "relatorio_revisao.xlsx"
+                df.to_excel(output_file, index=False, engine='openpyxl')
+                st.download_button(
+                    "Baixar relatório em Excel",
+                    data=open(output_file, "rb"),
+                    file_name=output_file
+                )
+
+# ========================================
+# CONTROLE DE PÁGINAS
+# ========================================
+if "logged_in" not in st.session_state:
+    st.session_state["logged_in"] = False
+if "page" not in st.session_state:
+    st.session_state["page"] = "login"
+
+if not st.session_state["logged_in"]:
     login_page()
 else:
-    if st.session_state.page == 2:
+    if st.session_state["page"] == "info":
         info_page()
-    elif st.session_state.page == 3:
+    elif st.session_state["page"] == "revisao":
         revisao_page()
