@@ -275,7 +275,7 @@ def pagina_login():
     # Centralizar logo e conteúdo
     left, center, right = st.columns([1, 2, 1])
     with center:
-        st.image(LOGO_VERTICAL, width=340, use_column_width=False))
+        st.image(LOGO_VERTICAL, width=340, use_column_width=False)
         st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
 
         st.markdown("<h2 style='margin:0;'>Login</h2>", unsafe_allow_html=True)
