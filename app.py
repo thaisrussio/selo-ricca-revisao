@@ -2,21 +2,21 @@ import streamlit as st
 import pdfplumber
 import pandas as pd
 from openai import OpenAI
-import re
+import io
 
 # ============================================================
 # CONFIGURAÇÕES INICIAIS
 # ============================================================
 st.set_page_config(page_title="Selo Ricca de Revisão", layout="wide")
+
+# Estilo CSS
 st.markdown(
     """
     <style>
-    /* Fonte Aeonik */
     @font-face {
         font-family: "Aeonik";
         src: url("assets/fonts/Aeonik-Regular.ttf") format("truetype");
         font-weight: 400;
-        font-style: normal;
     }
     @font-face {
         font-family: "Aeonik";
@@ -28,13 +28,11 @@ st.markdown(
         src: url("assets/fonts/Aeonik-Bold.ttf") format("truetype");
         font-weight: 700;
     }
-    
     html, body, [class*="css"]  {
         font-family: "Aeonik", sans-serif;
         background-color: #FFFFFF;
         color: #1B1B1B;
     }
-    
     .stButton>button {
         background-color: #E6007E;
         color: white;
@@ -43,22 +41,10 @@ st.markdown(
         padding: 10px 20px;
         border: none;
     }
-
     .stTextInput>div>input, .stSelectbox>div>div>div>input, .stTextArea>div>textarea {
         border-radius: 5px;
         border: 1px solid #ccc;
         padding: 8px;
-    }
-
-    .stHeader, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
-        font-family: "Aeonik", sans-serif;
-    }
-
-    .logo {
-        position: fixed;
-        top: 10px;
-        left: 10px;
-        z-index: 100;
     }
     </style>
     """, unsafe_allow_html=True
@@ -81,7 +67,7 @@ if "ready_to_process" not in st.session_state:
     st.session_state.ready_to_process = False
 
 # ============================================================
-# LOGIN GERAL
+# FUNÇÃO DE LOGIN
 # ============================================================
 def login():
     st.image("assets/logo.png/Vertical_Cor.png", width=150)
@@ -96,35 +82,34 @@ def login():
             st.error("Usuário ou senha incorretos")
 
 # ============================================================
-# PÁGINA INICIAL APÓS LOGIN
+# PÁGINA INICIAL (APÓS LOGIN)
 # ============================================================
 def pagina_inicial():
     st.image("assets/logo.png/Vertical_Cor.png", width=150)
     st.title("Selo Ricca de Revisão")
     st.subheader("Informações do usuário e projeto")
 
-    nome = st.text_input("Seu nome", value=st.session_state.user_name)
-    projeto = st.text_input("Projeto", value=st.session_state.project)
-    time = st.selectbox(
+    st.session_state.user_name = st.text_input("Seu nome", value=st.session_state.user_name)
+    st.session_state.project = st.text_input("Projeto", value=st.session_state.project)
+    st.session_state.team = st.selectbox(
         "Time",
-        ["Magenta", "Lilás", "Ouro", "Menta", "Patrulha", "Outro"]
+        ["Magenta", "Lilás", "Ouro", "Menta", "Patrulha", "Outro"],
+        index=0
     )
 
-    if st.button("Continuar", key="start_session"):
-        if nome.strip() == "" or projeto.strip() == "":
-            st.warning("Por favor, preencha nome e projeto antes de continuar")
+    if st.button("Continuar"):
+        if st.session_state.user_name.strip() == "" or st.session_state.project.strip() == "":
+            st.warning("Preencha nome e projeto antes de continuar")
         else:
-            st.session_state.user_name = nome
-            st.session_state.project = projeto
-            st.session_state.team = time
             st.session_state.ready_to_review = True
 
 # ============================================================
-# PÁGINA DE REVISÃO DE PDF
+# PÁGINA DE REVISÃO
 # ============================================================
 def pagina_revisao():
     st.image("assets/logo.png/Vertical_Cor.png", width=150)
     st.subheader(f"Usuário: {st.session_state.user_name} | Projeto: {st.session_state.project} | Time: {st.session_state.team}")
+
     st.info(
         "Faça upload de PDFs curtos para revisão. O relatório será gerado em Excel com ocorrências encontradas."
     )
@@ -139,10 +124,11 @@ def pagina_revisao():
 
     uploaded_file = st.file_uploader("Selecione o arquivo PDF", type=["pdf"])
 
-    if uploaded_file:
-        if st.button("Iniciar revisão", key="start_review"):
-            st.session_state.ready_to_process = True
+    # Botão único para iniciar revisão
+    if uploaded_file and st.button("Iniciar revisão"):
+        st.session_state.ready_to_process = True
 
+    # Processamento da revisão
     if uploaded_file and st.session_state.ready_to_process:
         client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
@@ -188,7 +174,6 @@ FORMATO DE SAÍDA (OBRIGATÓRIO – JSON):
 
         ocorrencias = []
 
-        # ===================== SPINNER =====================
         with st.spinner("Revisão em andamento, por favor aguarde..."):
             with pdfplumber.open(uploaded_file) as pdf:
                 for i, page in enumerate(pdf.pages, start=1):
@@ -220,43 +205,22 @@ FORMATO DE SAÍDA (OBRIGATÓRIO – JSON):
                             "justificativa": "Resposta da IA fora do formato esperado"
                         })
 
-        # ===================== RESULTADO =====================
+        # Resultado
         if ocorrencias:
             df = pd.DataFrame(ocorrencias)
             st.success("Revisão concluída. Relatório gerado.")
             st.dataframe(df, use_container_width=True)
 
-            # Botão para download do relatório
-            df_bytes = df.to_excel(index=False, engine='openpyxl')
+            # Download Excel
+            output = io.BytesIO()
+            df.to_excel(output, index=False, engine='openpyxl')
             st.download_button(
                 "Baixar relatório em Excel",
-                data=df_bytes,
+                data=output,
                 file_name=f"{st.session_state.project}_relatorio_revisao.xlsx"
             )
         else:
             st.info("Nenhuma ocorrência identificada. Texto em conformidade.")
-
-        # ===================== REGISTRO INTERNO =====================
-        log_entry = pd.DataFrame([{
-            "usuario": st.session_state.user_name,
-            "projeto": st.session_state.project,
-            "time": st.session_state.team,
-            "num_paginas": len(pdf.pages),
-            "num_ocorrencias": len(ocorrencias)
-        }])
-        try:
-            log_df = pd.read_excel("registro_uso.xlsx", engine='openpyxl')
-            log_df = pd.concat([log_df, log_entry], ignore_index=True)
-        except FileNotFoundError:
-            log_df = log_entry
-        log_df.to_excel("registro_uso.xlsx", index=False, engine='openpyxl')
-
-        # Botão para baixar registro interno
-        st.download_button(
-            "Baixar registro interno de uso",
-            data=log_df.to_excel(index=False, engine='openpyxl'),
-            file_name="registro_uso.xlsx"
-        )
 
 # ============================================================
 # FLUXO PRINCIPAL
@@ -265,3 +229,5 @@ if not st.session_state.authenticated:
     login()
 elif st.session_state.authenticated and not st.session_state.ready_to_review:
     pagina_inicial()
+else:
+    pagina_revisao()
