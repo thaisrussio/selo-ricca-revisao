@@ -65,6 +65,18 @@ st.markdown(
     unsafe_allow_html=True
 )
 st.set_page_config(page_title="Selo Ricca de Revisão", layout="wide")
+from PIL import Image
+
+# Carregar e exibir a imagem de fundo
+bg_image = Image.open("assets/Elementos/Patterns Escuras-03.png")  # substitua pela imagem da página
+st.image(
+    bg_image,
+    use_column_width=True,   # cobre toda a largura
+    output_format="PNG",
+    caption=None,
+    channels="RGB",
+    clamp=False
+)
 
 # Fontes Aeonik
 def load_fonts():
@@ -107,21 +119,26 @@ def set_background(image_filename, opacity=1.0):
     with open(img_path, "rb") as f:
         data = f.read()
     encoded = base64.b64encode(data).decode()
-    st.markdown(
-        f"""
-        <style>
-        .stApp {{
-            background-image: url("data:image/png;base64,{encoded}");
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            opacity: 1;
-            z-index: -1;
-        }}
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
+ st.markdown(
+    """
+    <style>
+    /* =====================================
+       Fundo da página (imagem) ocupando toda a largura
+       ===================================== */
+    .app-background {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;       /* Ocupa toda a largura */
+        height: 100%;      /* Ocupa toda a altura */
+        z-index: -1;       /* Fica atrás de todos os elementos */
+        opacity: 0.6;      /* Ajuste de opacidade */
+        object-fit: cover;  /* Mantém proporção da imagem */
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 # ============================================================
 # LOGIN
