@@ -49,7 +49,7 @@ st.markdown(
 
     /* Botão magenta */
     div.stButton > button {{
-        background-color: #FF00FF;
+        background-color: #FFF;
         color: white;
         font-weight: bold;
         font-family: 'Aeonik', sans-serif;
@@ -63,12 +63,18 @@ st.markdown(
     }}
 
     .background-image {{
-        position: absolute;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: auto;
+        height: auto;
+        pointer-events: none;
         z-index: -1;
-        width: 100%;
-        opacity: 0.1;
+    
+        opacity: 0.5;
     }}
     </style>
+    <img src="{bg_image}" class="bg-layer">
     """,
     unsafe_allow_html=True
 )
