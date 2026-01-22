@@ -191,7 +191,7 @@ def inject_global_css():
 # ============================================================
 # 4) FUNDO EM CAMADA (mais robusto — corrige pág 2 e 3)
 # ============================================================
-def set_background_image(filename: str, opacity: float = 0.5):
+def set_background_image(filename: str, opacity: float = 0.3):
     path = os.path.join(ELEMENTOS_DIR, filename)
     if not os.path.exists(path):
         st.error(f"Arquivo de fundo não encontrado: {path}")
@@ -226,7 +226,7 @@ def set_background_image(filename: str, opacity: float = 0.5):
             background-repeat: no-repeat;
             background-position: center;
             background-size: cover;
-            opacity: {0,5};
+            : {0,5};
             pointer-events: none;
             z-index: 0;
         }}
@@ -336,7 +336,7 @@ if "historico_uso" not in st.session_state:
 # 9) PÁGINAS
 # ============================================================
 def pagina_login():
-    set_background_image(BG_LOGIN, opacity=0.5)
+    set_background_image(BG_LOGIN, opacity=0.3)
 
     left, center, right = st.columns([1, 2, 1])
     with center:
@@ -359,7 +359,7 @@ def pagina_login():
 
 def pagina_info():
     # fundo da pág 2 (corrigido para aparecer)
-    set_background_image(BG_INFO, opacity=0.5)
+    set_background_image(BG_INFO, opacity=1)
 
     col_logo, col_spacer = st.columns([1, 6])
     with col_logo:
@@ -390,7 +390,7 @@ def pagina_info():
 
 def pagina_revisao():
     # fundo da pág 3 (corrigido para aparecer)
-    set_background_image(BG_REVISAO, opacity=0.5)
+    set_background_image(BG_REVISAO, opacity=0.7)
 
     col_logo, col_spacer = st.columns([1, 6])
     with col_logo:
