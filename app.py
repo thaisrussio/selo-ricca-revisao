@@ -118,45 +118,44 @@ def inject_global_css():
             color: rgba(255,255,255,0.75) !important;
         }}
 
-        /* ============================================================
-           SELECTBOX: grafite + texto branco (Aeonik Regular)
-           ============================================================ */
-        div[data-baseweb="select"] > div {{
-            background-color: var(--ricca-grafite) !important;
-            border-radius: 10px !important;
-            border: 1px solid var(--ricca-grafite) !important;
-        }}
-        div[data-baseweb="select"] span {{
-            color: var(--ricca-branco) !important;
-            font-family: 'Aeonik', sans-serif !important;
-            font-weight: 400 !important;
-        }}
-        div[data-baseweb="select"] svg {{
-            fill: var(--ricca-branco) !important;
-        }}
-        ul[role="listbox"] {{
-            background-color: var(--ricca-grafite) !important;
-        }}
-        ul[role="listbox"] * {{
-            color: var(--ricca-branco) !important;
-            font-family: 'Aeonik', sans-serif !important;
-            font-weight: 400 !important;
-        }}
-        /* Reforço: alguns builds colocam o texto em input interno do select */
-        div[data-baseweb="select"] input {{
-            color: var(--ricca-branco) !important;
-            font-family: 'Aeonik', sans-serif !important;
-            font-weight: 400 !important;
-        }}
-/* === GARANTE TEXTO BRANCO NO SELECTBOX (VALOR SELECIONADO) === */
+/* ============================================================
+   SELECTBOX: grafite + texto branco (Aeonik Regular)
+   ============================================================ */
+
+/* Container principal do select */
+div[data-baseweb="select"] > div {
+    background-color: var(--ricca-grafite) !important;
+    border-radius: 10px !important;
+    border: 1px solid var(--ricca-grafite) !important;
+}
+
+/* Garante texto branco em QUALQUER camada interna */
 div[data-baseweb="select"] *,
+div[data-baseweb="select"] div,
 div[data-baseweb="select"] span,
-div[data-baseweb="select"] input,
-div[data-baseweb="select"] div {
-    color: #FFFFFF !important;
+div[data-baseweb="select"] input {
+    color: var(--ricca-branco) !important;
     font-family: 'Aeonik', sans-serif !important;
     font-weight: 400 !important;
 }
+
+/* Ícone/seta do select */
+div[data-baseweb="select"] svg {
+    fill: var(--ricca-branco) !important;
+}
+
+/* Dropdown (lista de opções) */
+ul[role="listbox"] {
+    background-color: var(--ricca-grafite) !important;
+}
+
+/* Itens da lista */
+ul[role="listbox"] * {
+    color: var(--ricca-branco) !important;
+    font-family: 'Aeonik', sans-serif !important;
+    font-weight: 400 !important;
+}
+
         /* ============================================================
            FILE UPLOADER: grafite + texto branco
            ============================================================ */
