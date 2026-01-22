@@ -157,7 +157,7 @@ def inject_global_css():
             color: var(--ricca-branco) !important;
             font-family: 'Aeonik', sans-serif !important;
             font-weight: 400 !important;
-}}
+}
 
         /* ============================================================
            FILE UPLOADER: grafite + texto branco
