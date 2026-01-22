@@ -191,7 +191,7 @@ def inject_global_css():
 # ============================================================
 # 4) FUNDO EM CAMADA (mais robusto — corrige pág 2 e 3)
 # ============================================================
-def set_background_image(filename: str, opacity: float = 0.5):
+def set_background_image(filename: str, opacity: float = 0.3):
     path = os.path.join(ELEMENTOS_DIR, filename)
     if not os.path.exists(path):
         st.error(f"Arquivo de fundo não encontrado: {path}")
