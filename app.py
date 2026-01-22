@@ -191,7 +191,7 @@ def inject_global_css():
 # ============================================================
 # 4) FUNDO EM CAMADA (mais robusto — corrige pág 2 e 3)
 # ============================================================
-def set_background_image(filename: str, opacity: float = 0.3):
+def set_background_image(filename: str, opacity: float = 0.1):
     path = os.path.join(ELEMENTOS_DIR, filename)
     if not os.path.exists(path):
         st.error(f"Arquivo de fundo não encontrado: {path}")
@@ -363,7 +363,7 @@ def pagina_info():
 
     col_logo, col_spacer = st.columns([1, 6])
     with col_logo:
-        st.image(LOGO_HORIZONTAL, width=LOGO_HORIZONTAL_WIDTH, use_column_width=False)
+        st.image(LOGO_HORIZONTAL, width=LOGO_HORIZONTAL_WIDTH, use_column_width=300)
 
     st.markdown("<h2 style='margin-top:8px;'>Informações iniciais</h2>", unsafe_allow_html=True)
 
@@ -374,11 +374,10 @@ def pagina_info():
     with col2:
         st.selectbox(
             "Time",
-            ["Magenta", "Lilás", "Ouro", "Menta", "Patrulha", "Outro"],
+            ["Lilás", "Magenta", "Menta", "Ouro", "Patrulha", "Outro"],
             key="time_sel",
         )
 
-    # Glossário REMOVIDO da página 2 (conforme pedido)
 
     if st.button("Próximo"):
         if not st.session_state.nome_usuario.strip() or not st.session_state.nome_projeto.strip():
@@ -394,7 +393,7 @@ def pagina_revisao():
 
     col_logo, col_spacer = st.columns([1, 6])
     with col_logo:
-        st.image(LOGO_HORIZONTAL, width=LOGO_HORIZONTAL_WIDTH, use_column_width=False)
+        st.image(LOGO_HORIZONTAL, width=LOGO_HORIZONTAL_WIDTH, use_column_width=300)
 
     st.markdown("<h2 style='margin-top:8px;'>Revisão em PDF</h2>", unsafe_allow_html=True)
 
