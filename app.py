@@ -141,23 +141,27 @@ def inject_global_css():
             fill: var(--ricca-branco) !important;
         }}
 
-        /* Dropdown (lista de opções) */
-        ul[role="listbox"] {{
+        /* Dropdown (lista de opções) — reforço BaseWeb/Streamlit */
+        div[data-baseweb="popover"] ul[role="listbox"] {{
             background-color: var(--ricca-grafite) !important;
         }}
-        ul[role="listbox"] * {{
+
+        div[data-baseweb="popover"] ul[role="listbox"] * {{
             color: var(--ricca-branco) !important;
             font-family: 'Aeonik', sans-serif !important;
             font-weight: 400 !important;
         }}
-        /* Reforço FINAL: itens do dropdown do selectbox (lista suspensa) */
-        ul[role="listbox"] li,
-        ul[role="listbox"] span,
-        ul[role="listbox"] div {{
+
+        /* Itens do menu (muito comum no BaseWeb) */
+        div[data-baseweb="popover"] li[role="option"] {{
             color: var(--ricca-branco) !important;
             font-family: 'Aeonik', sans-serif !important;
             font-weight: 400 !important;
-}
+        }}
+
+        div[data-baseweb="popover"] li[role="option"] * {{
+            color: var(--ricca-branco) !important;
+        }}
 
         /* ============================================================
            FILE UPLOADER: grafite + texto branco
