@@ -150,6 +150,14 @@ def inject_global_css():
             font-family: 'Aeonik', sans-serif !important;
             font-weight: 400 !important;
         }}
+        /* Reforço FINAL: itens do dropdown do selectbox (lista suspensa) */
+        ul[role="listbox"] li,
+        ul[role="listbox"] span,
+        ul[role="listbox"] div {{
+            color: var(--ricca-branco) !important;
+            font-family: 'Aeonik', sans-serif !important;
+            font-weight: 400 !important;
+}}
 
         /* ============================================================
            FILE UPLOADER: grafite + texto branco
