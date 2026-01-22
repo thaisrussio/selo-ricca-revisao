@@ -35,11 +35,11 @@ BG_REVISAO = "Patterns Escuras_Prancheta 1.png"
 
 # Tamanhos (ajuste fino aqui)
 LOGO_HORIZONTAL_WIDTH = 150
-LOGO_LOGIN_WIDTH = 280  # diminuído (antes 340)
+LOGO_LOGIN_WIDTH = 280  # logo menor na página inicial
 
 
 # ============================================================
-# 3) CSS GLOBAL
+# 3) CSS GLOBAL (ATENÇÃO: dentro de f-string, use {{ e }} no CSS)
 # ============================================================
 def inject_global_css():
     st.markdown(
@@ -84,7 +84,7 @@ def inject_global_css():
         /* ---- Botões: magenta + texto branco + Aeonik Bold ---- */
         div.stButton > button {{
             background-color: var(--ricca-magenta) !important;
-            color: var(--ricca-branco) !important;  /* garante branco */
+            color: var(--ricca-branco) !important;
             font-family: 'Aeonik', sans-serif !important;
             font-weight: 700 !important;
             border: none !important;
@@ -112,49 +112,44 @@ def inject_global_css():
             border-radius: 10px !important;
             border: 1px solid var(--ricca-grafite) !important;
         }}
-        /* Placeholder em branco (levemente translúcido) */
         div[data-testid="stTextInput"] input::placeholder,
         div[data-testid="stTextArea"] textarea::placeholder {{
             color: rgba(255,255,255,0.75) !important;
         }}
 
-/* ============================================================
-   SELECTBOX: grafite + texto branco (Aeonik Regular)
-   ============================================================ */
+        /* ============================================================
+           SELECTBOX: grafite + texto branco (Aeonik Regular)
+           ============================================================ */
+        div[data-baseweb="select"] > div {{
+            background-color: var(--ricca-grafite) !important;
+            border-radius: 10px !important;
+            border: 1px solid var(--ricca-grafite) !important;
+        }}
 
-/* Container principal do select */
-div[data-baseweb="select"] > div {
-    background-color: var(--ricca-grafite) !important;
-    border-radius: 10px !important;
-    border: 1px solid var(--ricca-grafite) !important;
-}
+        /* Garante texto branco no valor selecionado e nas camadas internas */
+        div[data-baseweb="select"] *,
+        div[data-baseweb="select"] div,
+        div[data-baseweb="select"] span,
+        div[data-baseweb="select"] input {{
+            color: var(--ricca-branco) !important;
+            font-family: 'Aeonik', sans-serif !important;
+            font-weight: 400 !important;
+        }}
 
-/* Garante texto branco em QUALQUER camada interna */
-div[data-baseweb="select"] *,
-div[data-baseweb="select"] div,
-div[data-baseweb="select"] span,
-div[data-baseweb="select"] input {
-    color: var(--ricca-branco) !important;
-    font-family: 'Aeonik', sans-serif !important;
-    font-weight: 400 !important;
-}
+        /* Ícone/seta do select */
+        div[data-baseweb="select"] svg {{
+            fill: var(--ricca-branco) !important;
+        }}
 
-/* Ícone/seta do select */
-div[data-baseweb="select"] svg {
-    fill: var(--ricca-branco) !important;
-}
-
-/* Dropdown (lista de opções) */
-ul[role="listbox"] {
-    background-color: var(--ricca-grafite) !important;
-}
-
-/* Itens da lista */
-ul[role="listbox"] * {
-    color: var(--ricca-branco) !important;
-    font-family: 'Aeonik', sans-serif !important;
-    font-weight: 400 !important;
-}
+        /* Dropdown (lista de opções) */
+        ul[role="listbox"] {{
+            background-color: var(--ricca-grafite) !important;
+        }}
+        ul[role="listbox"] * {{
+            color: var(--ricca-branco) !important;
+            font-family: 'Aeonik', sans-serif !important;
+            font-weight: 400 !important;
+        }}
 
         /* ============================================================
            FILE UPLOADER: grafite + texto branco
@@ -169,7 +164,6 @@ ul[role="listbox"] * {
             font-family: 'Aeonik', sans-serif !important;
             font-weight: 400 !important;
         }}
-        /* Botão "Browse files" do uploader (se aparecer) */
         section[data-testid="stFileUploaderDropzone"] button {{
             color: var(--ricca-branco) !important;
             font-family: 'Aeonik', sans-serif !important;
@@ -318,14 +312,13 @@ if "historico_uso" not in st.session_state:
 
 
 # ============================================================
-# 9) PÁGINAS
+# 9) PÁGINAS (mantido igual ao que estava funcionando antes)
 # ============================================================
 def pagina_login():
     set_background_image(BG_LOGIN, opacity=0.20)
 
     left, center, right = st.columns([1, 2, 1])
     with center:
-        # logo menor na página inicial
         st.image(LOGO_VERTICAL, width=LOGO_LOGIN_WIDTH, use_column_width=False)
         st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
 
@@ -357,23 +350,22 @@ def pagina_info():
         nome = st.text_input("Seu nome", key="nome_usuario")
         projeto = st.text_input("Projeto", key="nome_projeto")
     with col2:
-        time_sel = st.selectbox(
+        st.selectbox(
             "Time",
-            [ "Lilás", "Magenta", "Menta", "Ouro", "Patrulha", "Outro"],
+            ["Magenta", "Lilás", "Ouro", "Menta", "Patrulha", "Outro"],
             key="time_sel",
         )
 
     st.markdown("<h3 style='margin-top:18px;'>Glossário do cliente</h3>", unsafe_allow_html=True)
-    gloss = st.text_area(
+    st.text_area(
         "Uma regra por linha (termo incorreto = termo correto)",
         placeholder="Ex.: diretor = Diretor-Presidente\nempresa = Companhia\ncolaborador(a) = funcionário(a)\nEstado - ES = Estado (ES)",
         key="glossario_cliente",
         height=160,
     )
 
-    # Botão "Voltar" removido na pág 2 (conforme pedido)
     if st.button("Próximo"):
-        if not nome.strip() or not projeto.strip():
+        if not st.session_state.nome_usuario.strip() or not st.session_state.nome_projeto.strip():
             st.error("Preencha seu nome e o nome do projeto antes de avançar.")
             st.stop()
         st.session_state.etapa = "revisao"
@@ -396,14 +388,11 @@ def pagina_revisao():
 
     uploaded = st.file_uploader("Selecione o arquivo PDF", type=["pdf"])
 
-    # Botões lado a lado, um em cada canto (esq/direita) na pág 3
     col_left, col_right = st.columns([1, 1])
-
     with col_left:
         if st.button("Voltar"):
             st.session_state.etapa = "info"
             st.rerun()
-
     with col_right:
         iniciar = st.button("Iniciar Revisão")
 
@@ -568,6 +557,8 @@ def pagina_revisao():
 # ============================================================
 # 10) ROTEAMENTO
 # ============================================================
+if "autenticado" not in st.session_state:
+    st.session_state.autenticado = False
 if not st.session_state.autenticado:
     pagina_login()
 else:
