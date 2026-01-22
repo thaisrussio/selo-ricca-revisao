@@ -145,20 +145,16 @@ def inject_global_css():
         div[data-baseweb="popover"] ul[role="listbox"] {{
             background-color: var(--ricca-grafite) !important;
         }}
-
         div[data-baseweb="popover"] ul[role="listbox"] * {{
             color: var(--ricca-branco) !important;
             font-family: 'Aeonik', sans-serif !important;
             font-weight: 400 !important;
         }}
-
-        /* Itens do menu (muito comum no BaseWeb) */
         div[data-baseweb="popover"] li[role="option"] {{
             color: var(--ricca-branco) !important;
             font-family: 'Aeonik', sans-serif !important;
             font-weight: 400 !important;
         }}
-
         div[data-baseweb="popover"] li[role="option"] * {{
             color: var(--ricca-branco) !important;
         }}
@@ -193,7 +189,7 @@ def inject_global_css():
 
 
 # ============================================================
-# 4) FUNDO EM CAMADA (robusto no Streamlit Cloud)
+# 4) FUNDO EM CAMADA (mais robusto — corrige pág 2 e 3)
 # ============================================================
 def set_background_image(filename: str, opacity: float = 0.18):
     path = os.path.join(ELEMENTOS_DIR, filename)
@@ -207,9 +203,21 @@ def set_background_image(filename: str, opacity: float = 0.18):
     st.markdown(
         f"""
         <style>
+        /* base branca */
         html, body, .stApp {{
             background: #FFFFFF !important;
         }}
+
+        /* força transparência nos containers que podem estar "tapando" o fundo */
+        [data-testid="stAppViewContainer"],
+        [data-testid="stAppViewContainer"] > div,
+        section.main,
+        .main,
+        .block-container {{
+            background: transparent !important;
+        }}
+
+        /* fundo */
         .stApp::before {{
             content: "";
             position: fixed;
@@ -222,10 +230,11 @@ def set_background_image(filename: str, opacity: float = 0.18):
             pointer-events: none;
             z-index: 0;
         }}
+
+        /* garante conteúdo acima do fundo */
         .stApp > .main {{
             position: relative;
             z-index: 1;
-            background: transparent !important;
         }}
         </style>
         """,
@@ -324,7 +333,7 @@ if "historico_uso" not in st.session_state:
 
 
 # ============================================================
-# 9) PÁGINAS (mantido igual ao que estava funcionando antes)
+# 9) PÁGINAS
 # ============================================================
 def pagina_login():
     set_background_image(BG_LOGIN, opacity=0.20)
@@ -349,7 +358,8 @@ def pagina_login():
 
 
 def pagina_info():
-    set_background_image(BG_INFO, opacity=0.14)
+    # fundo da pág 2 (corrigido para aparecer)
+    set_background_image(BG_INFO, opacity=0.18)
 
     col_logo, col_spacer = st.columns([1, 6])
     with col_logo:
@@ -359,8 +369,8 @@ def pagina_info():
 
     col1, col2 = st.columns([2, 1])
     with col1:
-        nome = st.text_input("Seu nome", key="nome_usuario")
-        projeto = st.text_input("Projeto", key="nome_projeto")
+        st.text_input("Seu nome", key="nome_usuario")
+        st.text_input("Projeto", key="nome_projeto")
     with col2:
         st.selectbox(
             "Time",
@@ -368,13 +378,7 @@ def pagina_info():
             key="time_sel",
         )
 
-    st.markdown("<h3 style='margin-top:18px;'>Glossário do cliente</h3>", unsafe_allow_html=True)
-    st.text_area(
-        "Uma regra por linha (termo incorreto = termo correto)",
-        placeholder="Ex.: diretor = Diretor-Presidente\nempresa = Companhia\ncolaborador(a) = funcionário(a)\nEstado - ES = Estado (ES)",
-        key="glossario_cliente",
-        height=160,
-    )
+    # Glossário REMOVIDO da página 2 (conforme pedido)
 
     if st.button("Próximo"):
         if not st.session_state.nome_usuario.strip() or not st.session_state.nome_projeto.strip():
@@ -385,7 +389,8 @@ def pagina_info():
 
 
 def pagina_revisao():
-    set_background_image(BG_REVISAO, opacity=0.10)
+    # fundo da pág 3 (corrigido para aparecer)
+    set_background_image(BG_REVISAO, opacity=0.16)
 
     col_logo, col_spacer = st.columns([1, 6])
     with col_logo:
@@ -398,8 +403,20 @@ def pagina_revisao():
         "Para controlar custos, comece com PDFs curtos."
     )
 
+    # ✅ Glossário MOVIDO para a página 3
+    st.markdown("<h3 style='margin-top:10px;'>Glossário do cliente</h3>", unsafe_allow_html=True)
+    st.text_area(
+        "Uma regra por linha (termo incorreto = termo correto)",
+        placeholder="Ex.: diretor = Diretor-Presidente\nempresa = Companhia\ncolaborador(a) = funcionário(a)\nEstado - ES = Estado (ES)",
+        key="glossario_cliente",
+        height=140,
+    )
+
+    st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+
     uploaded = st.file_uploader("Selecione o arquivo PDF", type=["pdf"])
 
+    # Botões lado a lado (canto esq / canto dir)
     col_left, col_right = st.columns([1, 1])
     with col_left:
         if st.button("Voltar"):
@@ -571,6 +588,7 @@ def pagina_revisao():
 # ============================================================
 if "autenticado" not in st.session_state:
     st.session_state.autenticado = False
+
 if not st.session_state.autenticado:
     pagina_login()
 else:
