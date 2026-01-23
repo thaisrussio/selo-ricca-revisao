@@ -34,7 +34,7 @@ BG_INFO = "Patterns-06.png"
 BG_REVISAO = "Patterns Escuras_Prancheta 1.png"
 
 # Tamanhos (ajuste fino aqui)
-LOGO_HORIZONTAL_WIDTH = 150
+LOGO_HORIZONTAL_WIDTH = 300
 LOGO_LOGIN_WIDTH = 300  # logo menor na página inicial
 
 
